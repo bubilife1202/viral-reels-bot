@@ -9,14 +9,14 @@ import requests
 import time
 import feedparser
 from datetime import datetime
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from bs4 import BeautifulSoup
 import re
 
 # 설정
 SUBREDDITS = ["TikTokCringe", "funny"]
 TOP_N = 3  # 각 서브레딧에서 가져올 영상 수
-GEMINI_MODEL = "gemini-2.0-flash-exp"  # 무료 티어 사용 가능, 하루 1500 요청
+GROQ_MODEL = "llama3-70b-8192"  # 무료 티어: 하루 14,400 요청
 HTML_FILE = "index.html"
 
 
@@ -79,15 +79,15 @@ def get_reddit_top_posts(subreddit, limit=3):
         return []
 
 
-def analyze_with_gemini(posts):
-    """Google Gemini로 영상 분석"""
-    api_key = os.environ.get("GOOGLE_API_KEY")
+def analyze_with_groq(posts):
+    """Groq AI로 영상 분석"""
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise ValueError("GOOGLE_API_KEY 환경변수가 설정되지 않았습니다!")
+        raise ValueError("GROQ_API_KEY 환경변수가 설정되지 않았습니다!")
 
-    llm = ChatGoogleGenerativeAI(
-        model=GEMINI_MODEL,
-        google_api_key=api_key,
+    llm = ChatGroq(
+        model=GROQ_MODEL,
+        groq_api_key=api_key,
         temperature=0.7
     )
 
@@ -140,7 +140,7 @@ def analyze_with_gemini(posts):
         response = llm.invoke(prompt)
         return response.content
     except Exception as e:
-        print(f"Gemini API 오류: {e}")
+        print(f"Groq API 오류: {e}")
         return None
 
 
@@ -290,7 +290,7 @@ def create_initial_html():
     </div>
 
     <footer>
-        <p>🤖 Powered by Reddit API + Google Gemini AI</p>
+        <p>🤖 Powered by Reddit API + Groq AI (Llama 3)</p>
         <p>자동 업데이트: 매일 오전 8시 (KST)</p>
     </footer>
 
@@ -325,9 +325,9 @@ def main():
 
     print(f"\n📊 총 {len(all_posts)}개 영상 수집 완료")
 
-    # 2. Gemini로 분석
-    print("\n🤖 Google Gemini AI 분석 시작...")
-    analysis = analyze_with_gemini(all_posts)
+    # 2. Groq AI로 분석
+    print("\n🤖 Groq AI 분석 시작...")
+    analysis = analyze_with_groq(all_posts)
 
     if not analysis:
         print("❌ AI 분석 실패")
