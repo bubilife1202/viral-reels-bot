@@ -5,6 +5,9 @@ on:
     # 매일 한국시간 오전 8시 (UTC 23시, 전날)
     - cron: '0 23 * * *'
   workflow_dispatch:  # 수동 실행 가능
+  push:
+    branches:
+      - 'claude/**'  # claude로 시작하는 모든 브랜치
 
 jobs:
   update:
