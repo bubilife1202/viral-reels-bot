@@ -16,7 +16,7 @@ import re
 # 설정
 SUBREDDITS = ["TikTokCringe", "funny"]
 TOP_N = 3  # 각 서브레딧에서 가져올 영상 수
-GROQ_MODEL = "llama3-70b-8192"  # 무료 티어: 하루 14,400 요청
+GROQ_MODEL = "llama-3.3-70b-versatile"  # 무료 티어: 하루 14,400 요청
 HTML_FILE = "index.html"
 
 
