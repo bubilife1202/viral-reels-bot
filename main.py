@@ -16,7 +16,7 @@ import re
 # 설정
 SUBREDDITS = ["TikTokCringe", "funny"]
 TOP_N = 3  # 각 서브레딧에서 가져올 영상 수
-GEMINI_MODEL = "gemini-1.5-pro"
+GEMINI_MODEL = "gemini-2.0-flash-exp"  # 무료 티어 사용 가능, 하루 1500 요청
 HTML_FILE = "index.html"
 
 
