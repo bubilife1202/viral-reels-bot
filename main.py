@@ -6,6 +6,7 @@ Viral Reels Dashboard - Reddit에서 인기 영상 수집 및 Gemini AI 분석
 import os
 import json
 import requests
+import time
 from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from bs4 import BeautifulSoup
@@ -21,9 +22,15 @@ HTML_FILE = "index.html"
 def get_reddit_top_posts(subreddit, limit=3):
     """Reddit에서 인기 게시물 가져오기 (JSON API 사용, 인증 불필요)"""
     url = f"https://www.reddit.com/r/{subreddit}/top.json?t=day&limit={limit}"
-    headers = {"User-Agent": "ViralReelsDashboard/1.0"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
 
     try:
+        # 요청 간 딜레이 추가 (Reddit API 정책 준수)
+        time.sleep(2)
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
