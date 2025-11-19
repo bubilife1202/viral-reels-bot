@@ -7,6 +7,7 @@ import os
 import json
 import requests
 import time
+import feedparser
 from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from bs4 import BeautifulSoup
@@ -20,42 +21,57 @@ HTML_FILE = "index.html"
 
 
 def get_reddit_top_posts(subreddit, limit=3):
-    """Reddit에서 인기 게시물 가져오기 (JSON API 사용, 인증 불필요)"""
-    url = f"https://www.reddit.com/r/{subreddit}/top.json?t=day&limit={limit}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
+    """Reddit에서 인기 게시물 가져오기 (RSS 피드 사용)"""
+    url = f"https://www.reddit.com/r/{subreddit}/top/.rss?t=day&limit={limit}"
 
     try:
         # 요청 간 딜레이 추가 (Reddit API 정책 준수)
         time.sleep(2)
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+
+        # RSS 피드 파싱
+        feed = feedparser.parse(url)
+
+        if not feed.entries:
+            print(f"   ⚠️  피드가 비어있습니다.")
+            return []
 
         posts = []
-        for post in data["data"]["children"]:
-            post_data = post["data"]
+        for entry in feed.entries[:limit]:
+            # 제목과 링크 추출
+            title = entry.get("title", "")
+            reddit_url = entry.get("link", "")
 
-            # 영상이 있는 게시물만 수집
+            # 콘텐츠에서 영상 URL 추출
+            content = entry.get("content", [{}])[0].get("value", "") if entry.get("content") else ""
+
             video_url = None
-            if post_data.get("is_video"):
-                video_url = post_data.get("url")
-            elif "v.redd.it" in post_data.get("url", ""):
-                video_url = post_data.get("url")
-            elif any(domain in post_data.get("url", "") for domain in ["youtube.com", "youtu.be", "tiktok.com"]):
-                video_url = post_data.get("url")
 
-            if video_url:
-                posts.append({
-                    "title": post_data.get("title", ""),
-                    "url": video_url,
-                    "reddit_url": f"https://reddit.com{post_data.get('permalink', '')}",
-                    "score": post_data.get("score", 0),
-                    "subreddit": subreddit
-                })
+            # HTML 콘텐츠에서 영상 링크 찾기
+            if content:
+                soup = BeautifulSoup(content, 'html.parser')
+
+                # 1. <a> 태그에서 영상 도메인 찾기
+                for link in soup.find_all('a', href=True):
+                    href = link['href']
+                    if any(domain in href for domain in ["v.redd.it", "youtube.com", "youtu.be", "tiktok.com", "imgur.com/", "gfycat.com"]):
+                        video_url = href
+                        break
+
+                # 2. 없으면 Reddit 자체 링크 사용
+                if not video_url and "v.redd.it" in reddit_url:
+                    video_url = reddit_url
+
+            # 영상이 없어도 일단 수집 (Gemini가 텍스트로도 분석 가능)
+            if not video_url:
+                video_url = reddit_url  # Reddit 페이지 링크라도 추가
+
+            posts.append({
+                "title": title,
+                "url": video_url,
+                "reddit_url": reddit_url,
+                "score": 0,  # RSS에는 점수 정보 없음
+                "subreddit": subreddit
+            })
 
         return posts
     except Exception as e:
