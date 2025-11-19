@@ -16,7 +16,7 @@ import re
 # 설정
 SUBREDDITS = ["TikTokCringe", "funny"]
 TOP_N = 3  # 각 서브레딧에서 가져올 영상 수
-GEMINI_MODEL = "gemini-1.5-flash"
+GEMINI_MODEL = "gemini-1.5-flash-latest"
 HTML_FILE = "index.html"
 
 
