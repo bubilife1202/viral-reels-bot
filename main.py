@@ -203,6 +203,10 @@ def create_initial_html():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔥 바이럴 릴스 아이디어 대시보드</title>
 
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8245597797545485"
+     crossorigin="anonymous"></script>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
