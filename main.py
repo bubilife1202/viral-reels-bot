@@ -8,7 +8,7 @@ import json
 import requests
 import time
 import feedparser
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from langchain_groq import ChatGroq
 from bs4 import BeautifulSoup
 import re
@@ -155,9 +155,15 @@ def update_html(analysis_html):
     with open(HTML_FILE, "r", encoding="utf-8") as f:
         html_content = f.read()
 
-    # 현재 날짜 생성
-    now = datetime.now()
-    date_str = now.strftime("%Y년 %m월 %d일 %A")
+    # 현재 날짜 생성 (한국 시간대)
+    kst = timezone(timedelta(hours=9))
+    now = datetime.now(kst)
+
+    # 한국어 요일
+    weekdays_kr = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+    weekday_kr = weekdays_kr[now.weekday()]
+
+    date_str = now.strftime(f"%Y년 %m월 %d일 {weekday_kr}")
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
 
     # 새로운 콘텐츠 블록 생성
