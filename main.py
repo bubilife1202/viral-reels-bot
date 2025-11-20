@@ -132,20 +132,31 @@ def analyze_with_groq(posts):
         # JSON 파싱
         content = response.content.strip()
 
+        print(f"📥 Groq AI 응답 길이: {len(content)} 문자")
+
         # JSON 추출 (```json 마크다운 제거)
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
             content = content.split("```")[1].split("```")[0].strip()
 
+        print(f"📝 JSON 추출 후 길이: {len(content)} 문자")
+
         data = json.loads(content)
-        return data.get("videos", [])
+        videos = data.get("videos", [])
+
+        print(f"✅ JSON 파싱 성공: {len(videos)}개 영상 데이터")
+        return videos
     except json.JSONDecodeError as e:
-        print(f"JSON 파싱 오류: {e}")
-        print(f"응답 내용: {response.content[:500]}")
+        print(f"❌ JSON 파싱 오류: {e}")
+        print(f"📄 응답 내용 (처음 1000자):")
+        print(response.content[:1000])
+        print("\n... (생략) ...")
         return None
     except Exception as e:
-        print(f"Groq API 오류: {e}")
+        print(f"❌ Groq API 오류: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
@@ -740,11 +751,15 @@ def main():
     print("\n🤖 Groq AI 분석 시작...")
     analysis = analyze_with_groq(all_posts)
 
-    if not analysis:
+    if analysis is None:
         print("❌ AI 분석 실패")
         return
 
-    print("✅ AI 분석 완료")
+    if not analysis or len(analysis) == 0:
+        print("⚠️  분석 결과가 비어있습니다 (videos 배열이 빔)")
+        return
+
+    print(f"✅ AI 분석 완료 ({len(analysis)}개 영상)")
 
     # 3. HTML 업데이트
     print("\n📝 HTML 업데이트 중...")
