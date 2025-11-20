@@ -2,12 +2,10 @@ name: Update Viral Reels Dashboard
 
 on:
   schedule:
-    # 매일 한국시간 오전 8시 (UTC 23시, 전날)
+    # 매일 한국시간 오전 8시 (UTC 전날 23시)
+    # 예: UTC 11/19 23:00 = KST 11/20 08:00
     - cron: '0 23 * * *'
   workflow_dispatch:  # 수동 실행 가능
-  push:
-    branches:
-      - 'claude/**'  # claude로 시작하는 모든 브랜치
 
 jobs:
   update:
