@@ -80,7 +80,7 @@ def get_reddit_top_posts(subreddit, limit=3):
 
 
 def analyze_with_groq(posts):
-    """Groq AI로 영상 분석"""
+    """Groq AI로 영상 분석 (JSON 구조 반환)"""
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise ValueError("GROQ_API_KEY 환경변수가 설정되지 않았습니다!")
@@ -93,52 +93,57 @@ def analyze_with_groq(posts):
 
     # 프롬프트 구성
     posts_summary = "\n\n".join([
-        f"[영상 {i+1}]\n제목: {p['title']}\n출처: r/{p['subreddit']}\n인기도: {p['score']} 👍\nURL: {p['url']}"
+        f"[영상 {i+1}]\n제목: {p['title']}\n출처: r/{p['subreddit']}\nURL: {p['url']}"
         for i, p in enumerate(posts)
     ])
 
-    prompt = f"""너는 100만 유튜버의 PD야. 아래 Reddit에서 오늘 인기있는 영상들을 분석해서, 한국 인스타그램 릴스에서 터질만한 콘텐츠 아이디어를 제안해줘.
+    prompt = f"""너는 인스타 릴스 100만 팔로워 크리에이터야. Reddit 영상들을 분석해서 한국 릴스로 만들 때 필요한 정보를 JSON으로 출력해.
 
 {posts_summary}
 
-**다음 형식으로 각 영상마다 분석 결과를 작성해줘:**
+**각 영상마다 다음 JSON 형식으로 분석해:**
 
-<div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬 [릴스 제목]</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
+{{
+  "videos": [
+    {{
+      "title": "15초로 요약한 릴스 제목 (한국어, 임팩트 있게)",
+      "virality_score": 8,
+      "difficulty": "Easy",
+      "category": "Faceless",
+      "hook_point": "첫 3초에 OO한 심리를 자극해서 터짐 (한 줄)",
+      "korean_patch": "한국에서는 이런 밈/음원/상황으로 바꾸면 좋음",
+      "script": "장면1: (0-3초) 후크 문구\\n장면2: (3-10초) 핵심 전개\\n장면3: (10-15초) 마무리 펀치라인\\n\\n자막: '핵심 자막 1-2줄'\\n해시태그: #태그1 #태그2 #태그3",
+      "original_url": "원본 Reddit URL",
+      "video_url": "영상 URL"
+    }}
+  ]
+}}
 
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>[이 영상의 바이럴 포인트와 한국에서 통할 이유]</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>[구체적인 장면 구성과 대사 예시]</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>[앵글, 편집 포인트, 효과 등]</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>[분위기에 맞는 음악 제안]</p>
-
-    <div class='mt-3'>
-      <a href='[원본 Reddit URL]' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='[영상 URL]' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-**중요:**
-- 반드시 위 HTML 구조를 정확히 따라서 작성해줘
-- 각 영상마다 하나의 카드를 만들어줘
-- [원본 Reddit URL]과 [영상 URL]은 실제 링크로 대체해줘
-- 한국어로 자연스럽게 작성해줘
+**중요 규칙:**
+- virality_score: 1~10 (AI가 판단한 바이럴 가능성)
+- difficulty: "Easy" (초보 가능), "Medium" (연기 필요), "Hard" (편집 기술 필요)
+- category: "Faceless" (얼굴 노출 X), "Skit" (상황극), "Trend" (챌린지), "Info" (정보성)
+- 반드시 유효한 JSON만 출력 (추가 설명 금지)
+- 각 필드는 실행 가능한 구체적 정보로 작성
 """
 
     try:
         response = llm.invoke(prompt)
-        return response.content
+        # JSON 파싱
+        content = response.content.strip()
+
+        # JSON 추출 (```json 마크다운 제거)
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0].strip()
+
+        data = json.loads(content)
+        return data.get("videos", [])
+    except json.JSONDecodeError as e:
+        print(f"JSON 파싱 오류: {e}")
+        print(f"응답 내용: {response.content[:500]}")
+        return None
     except Exception as e:
         print(f"Groq API 오류: {e}")
         return None
@@ -197,7 +202,74 @@ def remove_old_updates(html_content, current_time, days=7):
     return html_content
 
 
-def update_html(analysis_html):
+def generate_video_cards(videos):
+    """비디오 JSON 데이터로 HTML 카드 생성"""
+    cards_html = ""
+
+    difficulty_colors = {
+        "Easy": "success",
+        "Medium": "warning",
+        "Hard": "danger"
+    }
+
+    category_icons = {
+        "Faceless": "🎭",
+        "Skit": "🎬",
+        "Trend": "🔥",
+        "Info": "💡"
+    }
+
+    for video in videos:
+        difficulty = video.get("difficulty", "Medium")
+        category = video.get("category", "Trend")
+        color = difficulty_colors.get(difficulty, "secondary")
+        icon = category_icons.get(category, "🎬")
+
+        # 스크립트를 이스케이프 처리
+        script_escaped = video.get("script", "").replace("'", "\\'").replace("\n", "\\n")
+
+        cards_html += f"""
+        <div class="reel-card" data-category="{category}" data-difficulty="{difficulty}">
+            <div class="card-header">
+                <div class="badges">
+                    <span class="badge badge-{color}">{difficulty}</span>
+                    <span class="badge badge-score">바이럴 {video.get('virality_score', 5)}/10</span>
+                </div>
+                <span class="category-icon">{icon}</span>
+            </div>
+            <h3 class="card-title">{video.get('title', '제목 없음')}</h3>
+
+            <div class="card-section">
+                <h4>🎯 바이럴 포인트</h4>
+                <p>{video.get('hook_point', '분석 중...')}</p>
+            </div>
+
+            <div class="card-section">
+                <h4>🇰🇷 한국화 제안</h4>
+                <p>{video.get('korean_patch', '원본 그대로 사용 가능')}</p>
+            </div>
+
+            <div class="card-section script-section">
+                <div class="script-header">
+                    <h4>📝 스크립트</h4>
+                    <button class="copy-btn" onclick="copyScript('{script_escaped}')">
+                        📋 복사
+                    </button>
+                </div>
+                <pre class="script-content">{video.get('script', '스크립트 없음')}</pre>
+            </div>
+
+            <div class="card-footer">
+                <a href="{video.get('original_url', '#')}" class="btn btn-secondary" target="_blank">원본 보기</a>
+                <a href="{video.get('video_url', '#')}" class="btn btn-primary" target="_blank">영상 보기</a>
+            </div>
+        </div>
+"""
+
+    return cards_html
+
+
+def update_html(videos):
     """index.html 파일 업데이트 (최신 내용을 상단에 추가)"""
 
     # HTML 파일이 없으면 초기 템플릿 생성
@@ -219,17 +291,17 @@ def update_html(analysis_html):
     date_str = now.strftime(f"%Y년 %m월 %d일 {weekday_kr}")
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
 
+    # 비디오 카드 생성
+    cards_html = generate_video_cards(videos)
+
     # 새로운 콘텐츠 블록 생성
     new_content = f"""
     <!-- Update: {timestamp} -->
-    <div class="date-section mb-5">
-      <h2 class="text-center mb-4">
-        <span class="badge bg-primary">{date_str}</span>
-      </h2>
-
-      {analysis_html}
-
-      <hr class="my-5">
+    <div class="date-section">
+      <h2 class="date-badge">{date_str}</h2>
+      <div class="cards-grid">
+{cards_html}
+      </div>
     </div>
 """
 
@@ -242,8 +314,8 @@ def update_html(analysis_html):
     else:
         # 마커가 없으면 container 안에 추가
         html_content = html_content.replace(
-            '<div class="container my-5">',
-            f'<div class="container my-5">\n{new_content}'
+            '<div id="content">',
+            f'<div id="content">\n{new_content}'
         )
 
     # 7일 이상 된 콘텐츠 삭제
@@ -257,98 +329,335 @@ def update_html(analysis_html):
 
 
 def create_initial_html():
-    """초기 HTML 템플릿 생성"""
+    """초기 HTML 템플릿 생성 (Dark 테마 + 필터링)"""
     initial_html = """<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 바이럴 릴스 아이디어 대시보드</title>
+    <title>바이럴 릴스 분석 대시보드</title>
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8245597797545485"
      crossorigin="anonymous"></script>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            padding-bottom: 50px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
         }
 
         .header {
-            background: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: #121212;
+            border-bottom: 1px solid #1f1f1f;
             padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .filters {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+
+        .filter-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        #content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .date-section {
             margin-bottom: 3rem;
         }
 
-        .header h1 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: bold;
+        .date-badge {
+            display: inline-block;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
         }
 
-        .container {
-            max-width: 900px;
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
         }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            transition: transform 0.3s, box-shadow 0.3s;
+        .reel-card {
+            background: #121212;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        .reel-card:hover {
+            border-color: #2a2a2a;
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #10b981;
+            color: #000;
+        }
+
+        .badge-warning {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .badge-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .badge-score {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
         }
 
         .card-title {
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        .date-section h2 .badge {
-            font-size: 1.2rem;
-            padding: 0.6rem 1.5rem;
-        }
-
-        .text-muted {
-            color: #6c757d !important;
+            font-size: 1.1rem;
             font-weight: 600;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .card-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .card-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .card-section h4 {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .card-section p {
+            font-size: 0.9rem;
+            color: #d0d0d0;
+            line-height: 1.5;
+        }
+
+        .script-section {
+            background: #0a0a0a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #1f1f1f;
+        }
+
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .copy-btn {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .script-content {
+            background: transparent;
+            border: none;
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .card-footer {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
         }
 
         .btn {
-            border-radius: 20px;
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+            display: inline-block;
         }
 
-        hr {
-            border: 2px solid rgba(255,255,255,0.3);
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #2a2a2a;
         }
 
         footer {
+            background: #121212;
+            border-top: 1px solid #1f1f1f;
+            padding: 2rem;
             text-align: center;
-            color: white;
-            padding: 2rem 0;
-            margin-top: 3rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #888;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        footer a:hover {
+            color: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                padding: 0 1rem;
+            }
+
+            #content {
+                padding: 0 1rem 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="container">
-            <h1 class="text-center">🔥 바이럴 릴스 아이디어 대시보드</h1>
-            <p class="text-center text-muted">매일 아침 업데이트되는 인스타 릴스 콘텐츠 아이디어</p>
+        <div class="header-content">
+            <h1>🎬 바이럴 릴스 분석 대시보드</h1>
+            <p class="subtitle">실전 활용 가능한 릴스 아이디어 · 매일 오전 8시 업데이트</p>
         </div>
     </div>
 
-    <div class="container my-5">
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterCards('all')">전체</button>
+        <button class="filter-btn" onclick="filterCards('Faceless')">🎭 얼굴 노출 X</button>
+        <button class="filter-btn" onclick="filterCards('Skit')">🎬 상황극</button>
+        <button class="filter-btn" onclick="filterCards('Trend')">🔥 챌린지</button>
+        <button class="filter-btn" onclick="filterCards('Info')">💡 정보성</button>
+        <button class="filter-btn" onclick="filterCards('Easy')">초보자 추천</button>
+    </div>
+
+    <div id="content">
         <!-- CONTENT_START -->
 
         <!-- 여기에 새로운 콘텐츠가 추가됩니다 -->
@@ -356,19 +665,48 @@ def create_initial_html():
     </div>
 
     <footer>
-        <p>자동 업데이트: 매일 오전 8시 (KST)</p>
-        <div class="mt-3">
-            <a href="https://www.instagram.com/reels_code_official" target="_blank" class="text-white text-decoration-none me-4">
-                📷 Instagram
-            </a>
-            <a href="https://www.threads.com/@reels_code_official" target="_blank" class="text-white text-decoration-none">
-                🧵 Threads
-            </a>
+        <div>
+            <a href="https://www.instagram.com/reels_code_official" target="_blank">📷 Instagram</a>
+            <a href="https://www.threads.com/@reels_code_official" target="_blank">🧵 Threads</a>
         </div>
+        <p style="margin-top: 1rem;">자동 업데이트: 매일 오전 8시 (KST)</p>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 필터링 기능
+        function filterCards(filter) {
+            const cards = document.querySelectorAll('.reel-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            // 버튼 활성화 상태 변경
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 카드 필터링
+            cards.forEach(card => {
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } else if (filter === 'Easy') {
+                    card.style.display = card.dataset.difficulty === 'Easy' ? 'block' : 'none';
+                } else {
+                    card.style.display = card.dataset.category === filter ? 'block' : 'none';
+                }
+            });
+        }
+
+        // 스크립트 복사 기능
+        function copyScript(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                event.target.textContent = '✅ 복사됨';
+                setTimeout(() => {
+                    event.target.textContent = '📋 복사';
+                }, 2000);
+            }).catch(err => {
+                console.error('복사 실패:', err);
+                alert('복사에 실패했습니다.');
+            });
+        }
+    </script>
 </body>
 </html>
 """

@@ -3,277 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 바이럴 릴스 아이디어 대시보드</title>
+    <title>바이럴 릴스 분석 대시보드</title>
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8245597797545485"
      crossorigin="anonymous"></script>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            padding-bottom: 50px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
         }
 
         .header {
-            background: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: #121212;
+            border-bottom: 1px solid #1f1f1f;
             padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .filters {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+
+        .filter-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        #content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .date-section {
             margin-bottom: 3rem;
         }
 
-        .header h1 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: bold;
+        .date-badge {
+            display: inline-block;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
         }
 
-        .container {
-            max-width: 900px;
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
         }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            transition: transform 0.3s, box-shadow 0.3s;
+        .reel-card {
+            background: #121212;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        .reel-card:hover {
+            border-color: #2a2a2a;
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #10b981;
+            color: #000;
+        }
+
+        .badge-warning {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .badge-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .badge-score {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
         }
 
         .card-title {
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        .date-section h2 .badge {
-            font-size: 1.2rem;
-            padding: 0.6rem 1.5rem;
-        }
-
-        .text-muted {
-            color: #6c757d !important;
+            font-size: 1.1rem;
             font-weight: 600;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .card-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .card-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .card-section h4 {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .card-section p {
+            font-size: 0.9rem;
+            color: #d0d0d0;
+            line-height: 1.5;
+        }
+
+        .script-section {
+            background: #0a0a0a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #1f1f1f;
+        }
+
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .copy-btn {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .script-content {
+            background: transparent;
+            border: none;
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .card-footer {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
         }
 
         .btn {
-            border-radius: 20px;
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+            display: inline-block;
         }
 
-        hr {
-            border: 2px solid rgba(255,255,255,0.3);
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #2a2a2a;
         }
 
         footer {
+            background: #121212;
+            border-top: 1px solid #1f1f1f;
+            padding: 2rem;
             text-align: center;
-            color: white;
-            padding: 2rem 0;
-            margin-top: 3rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #888;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        footer a:hover {
+            color: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                padding: 0 1rem;
+            }
+
+            #content {
+                padding: 0 1rem 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="container">
-            <h1 class="text-center">🔥 바이럴 릴스 아이디어 대시보드</h1>
-            <p class="text-center text-muted">매일 아침 업데이트되는 인스타 릴스 콘텐츠 아이디어</p>
+        <div class="header-content">
+            <h1>🎬 바이럴 릴스 분석 대시보드</h1>
+            <p class="subtitle">실전 활용 가능한 릴스 아이디어 · 매일 오전 8시 업데이트</p>
         </div>
     </div>
 
-    <div class="container my-5">
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterCards('all')">전체</button>
+        <button class="filter-btn" onclick="filterCards('Faceless')">🎭 얼굴 노출 X</button>
+        <button class="filter-btn" onclick="filterCards('Skit')">🎬 상황극</button>
+        <button class="filter-btn" onclick="filterCards('Trend')">🔥 챌린지</button>
+        <button class="filter-btn" onclick="filterCards('Info')">💡 정보성</button>
+        <button class="filter-btn" onclick="filterCards('Easy')">초보자 추천</button>
+    </div>
+
+    <div id="content">
         <!-- CONTENT_START -->
 
-    <!-- Update: 2025-11-20 08:10:15 -->
-    <div class="date-section mb-5">
-      <h2 class="text-center mb-4">
-        <span class="badge bg-primary">2025년 11월 20일 목요일</span>
-      </h2>
-
-      <div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬ジム 의류 논란</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
-
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>이 영상은 ジム에서 입는 의류에 대한 논란을 다루고 있습니다. 한국에서도 FITNESS를 즐기는 사람들이 많아, 이 주제는 많은 사람들의 공감을 얻을 수 있을 것입니다. 특히, 최근 한국에서 juga 운동에 대한 관심이 높아져, 이러한 주제는 많은 사람들의 관심을 끌 수 있을 것입니다.</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>구체적인 장면 구성과 대사 예시는 다음과 같습니다. 주인공이 ジム에서 의류를 입고 운동하는 장면을 보여주고, 사람들이 주인공의 의류를 비웃거나 비판하는 장면을 보여줍니다. 이후 주인공이 이러한 비판에 대한 대답을 하는 장면을 보여줄 수 있습니다. 예를 들어, "나는 나의 몸이 편안한 의류를 입고 싶어. 왜 날 비판해야 하나?"와 같은 대사를 사용할 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>앵글, 편집 포인트, 효과 등은 다음과 같습니다. ジム에서 운동하는 장면을 촬영할 때, 주인공의 의류를 잘 보여줄 수 있도록 촬영해야 합니다. 또한, 사람들이 주인공의 의류를 비웃거나 비판하는 장면을 촬영할 때, 주인공의 반응을 잘 보여줄 수 있도록 촬영해야 합니다. 편집할 때, 이러한 장면들을 잘 연결하여 논란을 다루는 영상을 만들 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>분위기에 맞는 음악은 다음과 같습니다. "Eye of the Tiger"와 같은励ましい 음악을 사용하여, 주인공의 의류에 대한 자신감을 보여줄 수 있습니다. 또는, "Don't Stop Believin'"와 같은 음악을 사용하여, 주인공이 자신의 의류를 선택하는 것에 대한 자신감을 보여줄 수 있습니다.</p>
-
-    <div class='mt-3'>
-      <a href='https://v.redd.it/xra3imb1982g1' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='https://v.redd.it/xra3imb1982g1' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-<div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬 백팩이 아닌 가방</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
-
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>이 영상은 백팩이 아닌 가방을 사용하는 학생들의 모습을 보여줍니다. 한국에서도 학생들이 가방을 사용하는 경우가 많아, 이 주제는 많은 사람들의 공감을 얻을 수 있을 것입니다. 특히, 최근 한국에서 학생들의 가방 사용에 대한 관심이 높아져, 이러한 주제는 많은 사람들의 관심을 끌 수 있을 것입니다.</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>구체적인 장면 구성과 대사 예시는 다음과 같습니다. 학생들이 백팩이 아닌 가방을 사용하는 장면을 보여주고, 사람들이 이러한 가방을 사용하는 학생들을 비웃거나 비판하는 장면을 보여줍니다. 이후 학생들이 이러한 비판에 대한 대답을 하는 장면을 보여줄 수 있습니다. 예를 들어, "나는 나의 가방이 편안해. 왜 날 비판해야 하나?"와 같은 대사를 사용할 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>앵글, 편집 포인트, 효과 등은 다음과 같습니다. 학생들이 가방을 사용하는 장면을 촬영할 때, 가방을 잘 보여줄 수 있도록 촬영해야 합니다. 또한, 사람들이 이러한 가방을 사용하는 학생들을 비웃거나 비판하는 장면을 촬영할 때, 학생들의 반응을 잘 보여줄 수 있도록 촬영해야 합니다. 편집할 때, 이러한 장면들을 잘 연결하여 논란을 다루는 영상을 만들 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>분위기에 맞는 음악은 다음과 같습니다. "Happy"와 같은 밝은 음악을 사용하여, 학생들이 가방을 사용하는 것에 대한 자신감을 보여줄 수 있습니다. 또는, "We Are the Champions"와 같은 음악을 사용하여, 학생들이 자신의 가방을 선택하는 것에 대한 자신감을 보여줄 수 있습니다.</p>
-
-    <div class='mt-3'>
-      <a href='https://v.redd.it/1u71e6qfs92g1' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='https://v.redd.it/1u71e6qfs92g1' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-<div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬 하버드 교수의 스캔들</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
-
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>이 영상은 하버드 교수의 스캔들을 다루고 있습니다. 한국에서도 대학 교수들의 스캔들이 많은 관심을 끌고 있기 때문에, 이 주제는 많은 사람들의 관심을 끌 수 있을 것입니다. 특히, 최근 한국에서 대학 교수들의 스캔들에 대한 관심이 높아져, 이러한 주제는 많은 사람들의 관심을 끌 수 있을 것입니다.</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>구체적인 장면 구성과 대사 예시는 다음과 같습니다. 교수의 스캔들을 다루는 뉴스 장면을 보여주고, 사람들이 이러한 스캔들을 비판하는 장면을 보여줍니다. 이후 교수가 이러한 비판에 대한 대답을 하는 장면을 보여줄 수 있습니다. 예를 들어, "나는 나의 행동이 잘못되었다는 것을 알고 있다. 하지만 나는 나의 행동을 반성하고, 앞으로 더 나은 사람이 되겠다"와 같은 대사를 사용할 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>앵글, 편집 포인트, 효과 등은 다음과 같습니다. 뉴스 장면을 촬영할 때, 교수의 스캔들을 잘 보여줄 수 있도록 촬영해야 합니다. 또한, 사람들이 이러한 스캔들을 비판하는 장면을 촬영할 때, 교수의 반응을 잘 보여줄 수 있도록 촬영해야 합니다. 편집할 때, 이러한 장면들을 잘 연결하여 스캔들을 다루는 영상을 만들 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>분위기에 맞는 음악은 다음과 같습니다. "Somewhere Only We Know"와 같은 감성적인 음악을 사용하여, 교수의 스캔들을 다루는 영상을 만들 수 있습니다. 또는, "Hallelujah"와 같은 음악을 사용하여, 교수의 반성을 다루는 영상을 만들 수 있습니다.</p>
-
-    <div class='mt-3'>
-      <a href='https://v.redd.it/cn8hih31ca2g1' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='https://v.redd.it/cn8hih31ca2g1' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-<div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬 가이너스</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
-
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>이 영상은 가이너스를 다루고 있습니다. 한국에서도 가이너스가 많은 사람들의 관심을 끌고 있기 때문에, 이 주제는 많은 사람들의 관심을 끌 수 있을 것입니다. 특히, 최근 한국에서 가이너스에 대한 관심이 높아져, 이러한 주제는 많은 사람들의 관심을 끌 수 있을 것입니다.</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>구체적인 장면 구성과 대사 예시는 다음과 같습니다. 가이너스를 사용하는 사람들의 모습을 보여주고, 사람들이 이러한 가이너스를 사용하는 사람들을 비웃거나 비판하는 장면을 보여줍니다. 이후 가이너스를 사용하는 사람들이 이러한 비판에 대한 대답을 하는 장면을 보여줄 수 있습니다. 예를 들어, "나는 나의 가이너스가 편안해. 왜 날 비판해야 하나?"와 같은 대사를 사용할 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>앵글, 편집 포인트, 효과 등은 다음과 같습니다. 가이너스를 사용하는 사람들의 모습을 촬영할 때, 가이너스를 잘 보여줄 수 있도록 촬영해야 합니다. 또한, 사람들이 이러한 가이너스를 사용하는 사람들을 비웃거나 비판하는 장면을 촬영할 때, 가이너스를 사용하는 사람들의 반응을 잘 보여줄 수 있도록 촬영해야 합니다. 편집할 때, 이러한 장면들을 잘 연결하여 가이너스를 다루는 영상을 만들 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>분위기에 맞는 음악은 다음과 같습니다. "Uptown Funk"와 같은 밝은 음악을 사용하여, 가이너스를 사용하는 사람들의 모습을 다루는 영상을 만들 수 있습니다. 또는, "Can't Stop the Feeling!"와 같은 음악을 사용하여, 가이너스를 사용하는 사람들의 반성을 다루는 영상을 만들 수 있습니다.</p>
-
-    <div class='mt-3'>
-      <a href='https://www.reddit.com/r/funny/comments/1p0zlq0/gayenas/' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='https://www.reddit.com/r/funny/comments/1p0zlq0/gayenas/' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-<div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬 처음 해보는 일</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
-
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>이 영상은 처음 해보는 일에 대한 내용을 다루고 있습니다. 한국에서도 처음 해보는 일에 대한 관심이 높아져, 이러한 주제는 많은 사람들의 관심을 끌 수 있을 것입니다. 특히, 최근 한국에서 새로운 일에 대한 도전이 많은 사람들의 관심을 끌고 있기 때문에, 이 주제는 많은 사람들의 관심을끌 수 있을 것입니다.</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>구체적인 장면 구성과 대사 예시는 다음과 같습니다. 처음 해보는 일에 대한 도전을 다루는 장면을 보여주고, 사람들이 이러한 도전에 대한 반응을 보여주는 장면을 보여줍니다. 이후 처음 해보는 일에 대한 도전을 하는 사람들이 이러한 반응에 대한 대답을 하는 장면을 보여줄 수 있습니다. 예를 들어, "나는 나의 도전이 성공할 것이다. 왜 날 비판해야 하나?"와 같은 대사를 사용할 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>앵글, 편집 포인트, 효과 등은 다음과 같습니다. 처음 해보는 일에 대한 도전을 다루는 장면을 촬영할 때, 도전하는 사람들의 모습을 잘 보여줄 수 있도록 촬영해야 합니다. 또한, 사람들이 이러한 도전에 대한 반응을 보여주는 장면을 촬영할 때, 도전하는 사람들의 반응을 잘 보여줄 수 있도록 촬영해야 합니다. 편집할 때, 이러한 장면들을 잘 연결하여 처음 해보는 일에 대한 영상을 만들 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>분위기에 맞는 음악은 다음과 같습니다. "Roar"와 같은励ましい 음악을 사용하여, 처음 해보는 일에 대한 도전을 다루는 영상을 만들 수 있습니다. 또는, "Unstoppable"와 같은 음악을 사용하여, 처음 해보는 일에 대한 도전을 하는 사람들의 반성을 다루는 영상을 만들 수 있습니다.</p>
-
-    <div class='mt-3'>
-      <a href='https://v.redd.it/3ekqtwczy42g1' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='https://v.redd.it/3ekqtwczy42g1' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-<div class='card mb-4 shadow-sm'>
-  <div class='card-body'>
-    <div class='d-flex justify-content-between align-items-center mb-3'>
-      <h5 class='card-title mb-0'>🎬 절대 영화</h5>
-      <span class='badge bg-danger'>HOT</span>
-    </div>
-
-    <h6 class='text-muted mb-3'>📌 핵심 포인트</h6>
-    <p class='card-text'>이 영상은 절대 영화에 대한 내용을 다루고 있습니다. 한국에서도 영화에 대한 관심이 높아져, 이러한 주제는 많은 사람들의 관심을 끌 수 있을 것입니다. 특히, 최근 한국에서 새로운 영화에 대한 도전이 많은 사람들의 관심을 끌고 있기 때문에, 이 주제는 많은 사람들의 관심을 끌 수 있을 것입니다.</p>
-
-    <h6 class='text-muted mb-2'>🎭 각본 및 대본</h6>
-    <p class='card-text'>구체적인 장면 구성과 대사 예시는 다음과 같습니다. 절대 영화에 대한 내용을 다루는 장면을 보여주고, 사람들이 이러한 내용에 대한 반응을 보여주는 장면을 보여줍니다. 이후 절대 영화에 대한 내용을 다루는 사람들이 이러한 반응에 대한 대답을 하는 장면을 보여줄 수 있습니다. 예를 들어, "나는 나의 영화가 성공할 것이다. 왜 날 비판해야 하나?"와 같은 대사를 사용할 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>📸 촬영 팁</h6>
-    <p class='card-text'>앵글, 편집 포인트, 효과 등은 다음과 같습니다. 절대 영화에 대한 내용을 다루는 장면을 촬영할 때, 영화의 내용을 잘 보여줄 수 있도록 촬영해야 합니다. 또한, 사람들이 이러한 내용에 대한 반응을 보여주는 장면을 촬영할 때, 영화를 다루는 사람들의 반응을 잘 보여줄 수 있도록 촬영해야 합니다. 편집할 때, 이러한 장면들을 잘 연결하여 절대 영화에 대한 영상을 만들 수 있습니다.</p>
-
-    <h6 class='text-muted mb-2'>🎵 추천 BGM</h6>
-    <p class='card-text'>분위기에 맞는 음악은 다음과 같습니다. "Epic"와 같은 감성적인 음악을 사용하여, 절대 영화에 대한 내용을 다루는 영상을 만들 수 있습니다. 또는, "Legendary"와 같은 음악을 사용하여, 절대 영화에 대한 내용을 다루는 사람들의 반성을 다루는 영상을 만들 수 있습니다.</p>
-
-    <div class='mt-3'>
-      <a href='https://v.redd.it/8n9qhnptv32g1' class='btn btn-sm btn-outline-primary' target='_blank'>원본 보기</a>
-      <a href='https://v.redd.it/8n9qhnptv32g1' class='btn btn-sm btn-outline-success' target='_blank'>영상 보기</a>
-    </div>
-  </div>
-</div>
-
-      <hr class="my-5">
-    </div>
-
-
-<!-- 여기에 새로운 콘텐츠가 추가됩니다 -->
+        <!-- 여기에 새로운 콘텐츠가 추가됩니다 -->
 
     </div>
 
     <footer>
-        <p>자동 업데이트: 매일 오전 8시 (KST)</p>
-        <div class="mt-3">
-            <a href="https://www.instagram.com/reels_code_official" target="_blank" class="text-white text-decoration-none me-4">
-                📷 Instagram
-            </a>
-            <a href="https://www.threads.com/@reels_code_official" target="_blank" class="text-white text-decoration-none">
-                🧵 Threads
-            </a>
+        <div>
+            <a href="https://www.instagram.com/reels_code_official" target="_blank">📷 Instagram</a>
+            <a href="https://www.threads.com/@reels_code_official" target="_blank">🧵 Threads</a>
         </div>
+        <p style="margin-top: 1rem;">자동 업데이트: 매일 오전 8시 (KST)</p>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 필터링 기능
+        function filterCards(filter) {
+            const cards = document.querySelectorAll('.reel-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            // 버튼 활성화 상태 변경
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 카드 필터링
+            cards.forEach(card => {
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } else if (filter === 'Easy') {
+                    card.style.display = card.dataset.difficulty === 'Easy' ? 'block' : 'none';
+                } else {
+                    card.style.display = card.dataset.category === filter ? 'block' : 'none';
+                }
+            });
+        }
+
+        // 스크립트 복사 기능
+        function copyScript(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                event.target.textContent = '✅ 복사됨';
+                setTimeout(() => {
+                    event.target.textContent = '📋 복사';
+                }, 2000);
+            }).catch(err => {
+                console.error('복사 실패:', err);
+                alert('복사에 실패했습니다.');
+            });
+        }
+    </script>
 </body>
 </html>
