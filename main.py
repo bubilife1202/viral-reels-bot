@@ -144,6 +144,59 @@ def analyze_with_groq(posts):
         return None
 
 
+def remove_old_updates(html_content, current_time, days=7):
+    """7일 이상 된 업데이트 섹션 삭제"""
+    import re
+
+    # 모든 Update 주석과 날짜 찾기
+    update_pattern = r'<!-- Update: ([\d\-: ]+) -->'
+    matches = list(re.finditer(update_pattern, html_content))
+
+    if len(matches) <= 1:
+        # 업데이트가 1개 이하면 삭제하지 않음
+        return html_content
+
+    cutoff_date = current_time - timedelta(days=days)
+    sections_to_remove = []
+
+    for i, match in enumerate(matches):
+        update_time_str = match.group(1)
+        try:
+            # 업데이트 시간 파싱 (KST)
+            kst = timezone(timedelta(hours=9))
+            update_time = datetime.strptime(update_time_str, "%Y-%m-%d %H:%M:%S")
+            update_time = update_time.replace(tzinfo=kst)
+
+            # 7일 이상 된 경우
+            if update_time < cutoff_date:
+                # 이 섹션의 시작과 끝 찾기
+                section_start = match.start()
+
+                # 다음 Update 주석 또는 "여기에 새로운 콘텐츠가 추가됩니다" 주석까지
+                if i + 1 < len(matches):
+                    section_end = matches[i + 1].start()
+                else:
+                    # 마지막 섹션인 경우, "여기에 새로운 콘텐츠가 추가됩니다" 주석까지
+                    footer_marker = html_content.find("<!-- 여기에 새로운 콘텐츠가 추가됩니다 -->", section_start)
+                    if footer_marker != -1:
+                        section_end = footer_marker
+                    else:
+                        section_end = len(html_content)
+
+                sections_to_remove.append((section_start, section_end))
+                print(f"🗑️  7일 이상 된 업데이트 삭제: {update_time_str}")
+
+        except Exception as e:
+            print(f"⚠️  날짜 파싱 오류: {update_time_str} - {e}")
+            continue
+
+    # 뒤에서부터 삭제 (인덱스가 변하지 않도록)
+    for start, end in reversed(sections_to_remove):
+        html_content = html_content[:start] + html_content[end:]
+
+    return html_content
+
+
 def update_html(analysis_html):
     """index.html 파일 업데이트 (최신 내용을 상단에 추가)"""
 
@@ -192,6 +245,9 @@ def update_html(analysis_html):
             '<div class="container my-5">',
             f'<div class="container my-5">\n{new_content}'
         )
+
+    # 7일 이상 된 콘텐츠 삭제
+    html_content = remove_old_updates(html_content, now, days=7)
 
     # 파일 저장
     with open(HTML_FILE, "w", encoding="utf-8") as f:
