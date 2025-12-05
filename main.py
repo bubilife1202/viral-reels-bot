@@ -9,14 +9,15 @@ import requests
 import time
 import feedparser
 from datetime import datetime, timezone, timedelta
-from langchain_groq import ChatGroq
+from google import genai
+from google.genai import types
 from bs4 import BeautifulSoup
 import re
 
 # 설정
 SUBREDDITS = ["TikTokCringe", "funny"]
 TOP_N = 3  # 각 서브레딧에서 가져올 영상 수
-GROQ_MODEL = "llama-3.3-70b-versatile"  # 무료 티어: 하루 14,400 요청
+GEMINI_MODEL = "gemini-2.5-flash"  # Google Gemini 2.5 Flash
 HTML_FILE = "index.html"
 
 
@@ -79,17 +80,14 @@ def get_reddit_top_posts(subreddit, limit=3):
         return []
 
 
-def analyze_with_groq(posts):
-    """Groq AI로 영상 분석 (JSON 구조 반환)"""
-    api_key = os.environ.get("GROQ_API_KEY")
+def analyze_with_gemini(posts):
+    """Gemini AI로 영상 분석 (JSON 구조 반환)"""
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GROQ_API_KEY 환경변수가 설정되지 않았습니다!")
+        raise ValueError("GEMINI_API_KEY 환경변수가 설정되지 않았습니다!")
 
-    llm = ChatGroq(
-        model=GROQ_MODEL,
-        groq_api_key=api_key,
-        temperature=0.7
-    )
+    # Gemini 클라이언트 초기화
+    client = genai.Client(api_key=api_key)
 
     # 프롬프트 구성
     posts_summary = "\n\n".join([
@@ -128,11 +126,17 @@ def analyze_with_groq(posts):
 """
 
     try:
-        response = llm.invoke(prompt)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+            )
+        )
         # JSON 파싱
-        content = response.content.strip()
+        content = response.text.strip()
 
-        print(f"📥 Groq AI 응답 길이: {len(content)} 문자")
+        print(f"📥 Gemini AI 응답 길이: {len(content)} 문자")
 
         # JSON 추출 (```json 마크다운 제거)
         if "```json" in content:
@@ -150,11 +154,11 @@ def analyze_with_groq(posts):
     except json.JSONDecodeError as e:
         print(f"❌ JSON 파싱 오류: {e}")
         print(f"📄 응답 내용 (처음 1000자):")
-        print(response.content[:1000])
+        print(response.text[:1000])
         print("\n... (생략) ...")
         return None
     except Exception as e:
-        print(f"❌ Groq API 오류: {e}")
+        print(f"❌ Gemini API 오류: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -747,9 +751,9 @@ def main():
 
     print(f"\n📊 총 {len(all_posts)}개 영상 수집 완료")
 
-    # 2. Groq AI로 분석
-    print("\n🤖 Groq AI 분석 시작...")
-    analysis = analyze_with_groq(all_posts)
+    # 2. Gemini AI로 분석
+    print("\n🤖 Gemini AI 분석 시작...")
+    analysis = analyze_with_gemini(all_posts)
 
     if analysis is None:
         print("❌ AI 분석 실패")
