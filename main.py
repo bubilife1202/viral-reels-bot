@@ -7,7 +7,7 @@ import os
 import json
 import requests
 import time
-import feedparser
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from google import genai
 from google.genai import types
@@ -22,28 +22,48 @@ HTML_FILE = "index.html"
 
 
 def get_reddit_top_posts(subreddit, limit=3):
-    """Reddit에서 인기 게시물 가져오기 (RSS 피드 사용)"""
+    """Reddit에서 인기 게시물 가져오기 (RSS 피드 사용, xml.etree로 파싱)"""
     url = f"https://www.reddit.com/r/{subreddit}/top/.rss?t=day&limit={limit}"
 
     try:
         # 요청 간 딜레이 추가 (Reddit API 정책 준수)
         time.sleep(2)
 
-        # RSS 피드 파싱
-        feed = feedparser.parse(url)
+        # HTTP 요청으로 RSS 피드 가져오기
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (compatible; ViralReelsBot/1.0)'
+        }
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
 
-        if not feed.entries:
+        # XML 파싱
+        root = ET.fromstring(response.content)
+
+        # Atom 네임스페이스 정의
+        ns = {
+            'atom': 'http://www.w3.org/2005/Atom',
+            'media': 'http://search.yahoo.com/mrss/'
+        }
+
+        # entry 요소들 찾기
+        entries = root.findall('atom:entry', ns)
+
+        if not entries:
             print(f"   ⚠️  피드가 비어있습니다.")
             return []
 
         posts = []
-        for entry in feed.entries[:limit]:
+        for entry in entries[:limit]:
             # 제목과 링크 추출
-            title = entry.get("title", "")
-            reddit_url = entry.get("link", "")
+            title_elem = entry.find('atom:title', ns)
+            title = title_elem.text if title_elem is not None else ""
+
+            link_elem = entry.find('atom:link', ns)
+            reddit_url = link_elem.get('href', '') if link_elem is not None else ""
 
             # 콘텐츠에서 영상 URL 추출
-            content = entry.get("content", [{}])[0].get("value", "") if entry.get("content") else ""
+            content_elem = entry.find('atom:content', ns)
+            content = content_elem.text if content_elem is not None else ""
 
             video_url = None
 
