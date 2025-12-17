@@ -161,6 +161,22 @@
             color: #fff;
         }
 
+        .badge-tiktok {
+            background: #000;
+            color: #fff;
+            border: 1px solid #ff0050;
+        }
+
+        .badge-instagram {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: #fff;
+        }
+
+        .badge-general {
+            background: #374151;
+            color: #fff;
+        }
+
         .category-icon {
             font-size: 1.5rem;
         }
@@ -171,6 +187,45 @@
             color: #fff;
             margin-bottom: 1rem;
             line-height: 1.4;
+        }
+
+        .video-embed {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-embed iframe {
+            width: 100%;
+            aspect-ratio: 9/16;
+            max-height: 400px;
+            border: none;
+        }
+
+        .video-placeholder {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .video-placeholder:hover {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            border-color: #4a4a4a;
+        }
+
+        .play-icon {
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .play-text {
+            color: #888;
+            font-size: 0.9rem;
         }
 
         .card-section {
@@ -318,11 +373,15 @@
 
     <div class="filters">
         <button class="filter-btn active" onclick="filterCards('all')">전체</button>
-        <button class="filter-btn" onclick="filterCards('Faceless')">🎭 얼굴 노출 X</button>
-        <button class="filter-btn" onclick="filterCards('Skit')">🎬 상황극</button>
-        <button class="filter-btn" onclick="filterCards('Trend')">🔥 챌린지</button>
-        <button class="filter-btn" onclick="filterCards('Info')">💡 정보성</button>
-        <button class="filter-btn" onclick="filterCards('Easy')">초보자 추천</button>
+        <span style="color:#333; margin: 0 0.5rem;">|</span>
+        <button class="filter-btn" onclick="filterCards('platform', 'TikTok')">📱 TikTok</button>
+        <button class="filter-btn" onclick="filterCards('platform', 'Instagram')">📷 Instagram</button>
+        <span style="color:#333; margin: 0 0.5rem;">|</span>
+        <button class="filter-btn" onclick="filterCards('category', 'Faceless')">🎭 얼굴 노출 X</button>
+        <button class="filter-btn" onclick="filterCards('category', 'Skit')">🎬 상황극</button>
+        <button class="filter-btn" onclick="filterCards('category', 'Trend')">🔥 챌린지</button>
+        <button class="filter-btn" onclick="filterCards('category', 'Info')">💡 정보성</button>
+        <button class="filter-btn" onclick="filterCards('difficulty', 'Easy')">초보자 추천</button>
     </div>
 
     <div id="content">
@@ -1649,7 +1708,7 @@
         trackVisitor();
 
         // 필터링 기능
-        function filterCards(filter) {
+        function filterCards(filterType, filterValue) {
             const cards = document.querySelectorAll('.reel-card');
             const buttons = document.querySelectorAll('.filter-btn');
 
@@ -1659,12 +1718,14 @@
 
             // 카드 필터링
             cards.forEach(card => {
-                if (filter === 'all') {
+                if (filterType === 'all') {
                     card.style.display = 'block';
-                } else if (filter === 'Easy') {
-                    card.style.display = card.dataset.difficulty === 'Easy' ? 'block' : 'none';
-                } else {
-                    card.style.display = card.dataset.category === filter ? 'block' : 'none';
+                } else if (filterType === 'platform') {
+                    card.style.display = card.dataset.platform === filterValue ? 'block' : 'none';
+                } else if (filterType === 'category') {
+                    card.style.display = card.dataset.category === filterValue ? 'block' : 'none';
+                } else if (filterType === 'difficulty') {
+                    card.style.display = card.dataset.difficulty === filterValue ? 'block' : 'none';
                 }
             });
         }

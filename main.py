@@ -15,13 +15,19 @@ from bs4 import BeautifulSoup
 import re
 
 # 설정
-SUBREDDITS = ["TikTokCringe", "funny"]
-TOP_N = 3  # 각 서브레딧에서 가져올 영상 수
+# 플랫폼별 서브레딧 설정
+SUBREDDIT_CONFIG = [
+    {"subreddit": "TikTokCringe", "platform": "TikTok", "limit": 3},
+    {"subreddit": "tiktoks", "platform": "TikTok", "limit": 2},
+    {"subreddit": "Instagramreels", "platform": "Instagram", "limit": 3},
+    {"subreddit": "reelsinstagram", "platform": "Instagram", "limit": 2},
+    {"subreddit": "funny", "platform": "General", "limit": 2},
+]
 GEMINI_MODEL = "gemini-2.5-flash"  # Google Gemini 2.5 Flash
 HTML_FILE = "index.html"
 
 
-def get_reddit_top_posts(subreddit, limit=3):
+def get_reddit_top_posts(subreddit, limit=3, platform="General"):
     """Reddit에서 인기 게시물 가져오기 (RSS 피드 사용, xml.etree로 파싱)"""
     url = f"https://www.reddit.com/r/{subreddit}/top/.rss?t=day&limit={limit}"
 
@@ -91,7 +97,8 @@ def get_reddit_top_posts(subreddit, limit=3):
                 "url": video_url,
                 "reddit_url": reddit_url,
                 "score": 0,  # RSS에는 점수 정보 없음
-                "subreddit": subreddit
+                "subreddit": subreddit,
+                "platform": platform
             })
 
         return posts
@@ -111,7 +118,7 @@ def analyze_with_gemini(posts):
 
     # 프롬프트 구성
     posts_summary = "\n\n".join([
-        f"[영상 {i+1}]\n제목: {p['title']}\n출처: r/{p['subreddit']}\nURL: {p['url']}"
+        f"[영상 {i+1}]\n제목: {p['title']}\n플랫폼: {p.get('platform', 'General')}\n출처: r/{p['subreddit']}\nURL: {p['url']}"
         for i, p in enumerate(posts)
     ])
 
@@ -128,6 +135,7 @@ def analyze_with_gemini(posts):
       "virality_score": 8,
       "difficulty": "Easy",
       "category": "Faceless",
+      "platform": "TikTok 또는 Instagram 또는 General",
       "hook_point": "첫 3초에 OO한 심리를 자극해서 터짐 (한 줄)",
       "korean_patch": "한국에서는 이런 밈/음원/상황으로 바꾸면 좋음",
       "script": "장면1: (0-3초) 후크 문구\\n장면2: (3-10초) 핵심 전개\\n장면3: (10-15초) 마무리 펀치라인\\n\\n자막: '핵심 자막 1-2줄'\\n해시태그: #태그1 #태그2 #태그3",
@@ -141,6 +149,7 @@ def analyze_with_gemini(posts):
 - virality_score: 1~10 (AI가 판단한 바이럴 가능성)
 - difficulty: "Easy" (초보 가능), "Medium" (연기 필요), "Hard" (편집 기술 필요)
 - category: "Faceless" (얼굴 노출 X), "Skit" (상황극), "Trend" (챌린지), "Info" (정보성)
+- platform: "TikTok", "Instagram", "General" 중 하나 (원본 플랫폼 그대로 사용)
 - 반드시 유효한 JSON만 출력 (추가 설명 금지)
 - 각 필드는 실행 가능한 구체적 정보로 작성
 """
@@ -254,26 +263,62 @@ def generate_video_cards(videos):
         "Info": "💡"
     }
 
+    platform_badges = {
+        "TikTok": ("badge-tiktok", "📱 TikTok"),
+        "Instagram": ("badge-instagram", "📷 Instagram"),
+        "General": ("badge-general", "🎬 General")
+    }
+
     for video in videos:
         difficulty = video.get("difficulty", "Medium")
         category = video.get("category", "Trend")
+        platform = video.get("platform", "General")
         color = difficulty_colors.get(difficulty, "secondary")
         icon = category_icons.get(category, "🎬")
+        platform_class, platform_label = platform_badges.get(platform, ("badge-general", "🎬 General"))
 
         # 스크립트를 이스케이프 처리
         script_escaped = video.get("script", "").replace("'", "\\'").replace("\n", "\\n")
 
+        # 영상 URL
+        video_url = video.get('video_url', '#')
+
+        # 영상 임베드 생성 (v.redd.it 영상은 Reddit 플레이어로)
+        video_embed = ""
+        if "v.redd.it" in video_url or "reddit.com" in video_url:
+            # Reddit 영상 임베드
+            reddit_url = video.get('original_url', video_url)
+            video_embed = f'''
+            <div class="video-embed">
+                <div class="video-placeholder" onclick="window.open('{reddit_url}', '_blank')">
+                    <span class="play-icon">▶</span>
+                    <span class="play-text">클릭하여 영상 보기</span>
+                </div>
+            </div>'''
+        elif "youtube.com" in video_url or "youtu.be" in video_url:
+            # YouTube 영상 ID 추출
+            if "youtu.be" in video_url:
+                yt_id = video_url.split("/")[-1].split("?")[0]
+            else:
+                yt_id = video_url.split("v=")[-1].split("&")[0] if "v=" in video_url else ""
+            if yt_id:
+                video_embed = f'''
+            <div class="video-embed">
+                <iframe src="https://www.youtube.com/embed/{yt_id}" frameborder="0" allowfullscreen></iframe>
+            </div>'''
+
         cards_html += f"""
-        <div class="reel-card" data-category="{category}" data-difficulty="{difficulty}">
+        <div class="reel-card" data-category="{category}" data-difficulty="{difficulty}" data-platform="{platform}">
             <div class="card-header">
                 <div class="badges">
+                    <span class="badge {platform_class}">{platform_label}</span>
                     <span class="badge badge-{color}">{difficulty}</span>
                     <span class="badge badge-score">바이럴 {video.get('virality_score', 5)}/10</span>
                 </div>
                 <span class="category-icon">{icon}</span>
             </div>
             <h3 class="card-title">{video.get('title', '제목 없음')}</h3>
-
+            {video_embed}
             <div class="card-section">
                 <h4>🎯 바이럴 포인트</h4>
                 <p>{video.get('hook_point', '분석 중...')}</p>
@@ -759,9 +804,12 @@ def main():
 
     # 1. Reddit에서 영상 수집
     all_posts = []
-    for subreddit in SUBREDDITS:
-        print(f"\n📡 r/{subreddit}에서 데이터 수집 중...")
-        posts = get_reddit_top_posts(subreddit, TOP_N)
+    for config in SUBREDDIT_CONFIG:
+        subreddit = config["subreddit"]
+        platform = config["platform"]
+        limit = config.get("limit", 3)
+        print(f"\n📡 r/{subreddit} ({platform})에서 데이터 수집 중...")
+        posts = get_reddit_top_posts(subreddit, limit, platform)
         all_posts.extend(posts)
         print(f"   ✅ {len(posts)}개 게시물 수집 완료")
 
