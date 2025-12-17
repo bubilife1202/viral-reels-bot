@@ -7,12 +7,10 @@ import os
 import json
 import requests
 import time
-import xml.etree.ElementTree as ET
+import re
 from datetime import datetime, timezone, timedelta
 from google import genai
 from google.genai import types
-from bs4 import BeautifulSoup
-import re
 
 # 설정
 # 플랫폼별 서브레딧 설정 (활성화된 서브레딧만 사용)
@@ -31,82 +29,88 @@ HTML_FILE = "index.html"
 
 
 def get_reddit_top_posts(subreddit, limit=3, platform="General"):
-    """Reddit에서 인기 게시물 가져오기 (RSS 피드 사용, xml.etree로 파싱)"""
-    url = f"https://www.reddit.com/r/{subreddit}/top/.rss?t=day&limit={limit}"
+    """Reddit에서 인기 게시물 가져오기 (JSON API 사용)"""
+    # JSON API 사용 (더 안정적이고 최신 데이터)
+    url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit={limit * 2}"
 
     try:
         # 요청 간 딜레이 추가 (Reddit API 정책 준수)
-        time.sleep(2)
+        time.sleep(3)
 
-        # HTTP 요청으로 RSS 피드 가져오기
         headers = {
-            'User-Agent': 'Mozilla/5.0 (compatible; ViralReelsBot/1.0)'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
         response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
 
-        # XML 파싱
-        root = ET.fromstring(response.content)
+        data = response.json()
+        children = data.get('data', {}).get('children', [])
 
-        # Atom 네임스페이스 정의
-        ns = {
-            'atom': 'http://www.w3.org/2005/Atom',
-            'media': 'http://search.yahoo.com/mrss/'
-        }
-
-        # entry 요소들 찾기
-        entries = root.findall('atom:entry', ns)
-
-        if not entries:
-            print(f"   ⚠️  피드가 비어있습니다.")
+        if not children:
+            print(f"   ⚠️  r/{subreddit} 피드가 비어있습니다.")
             return []
 
         posts = []
-        for entry in entries[:limit]:
-            # 제목과 링크 추출
-            title_elem = entry.find('atom:title', ns)
-            title = title_elem.text if title_elem is not None else ""
+        for child in children:
+            post = child.get('data', {})
 
-            link_elem = entry.find('atom:link', ns)
-            reddit_url = link_elem.get('href', '') if link_elem is not None else ""
+            # 영상 게시물만 필터링
+            is_video = post.get('is_video', False)
+            has_media = post.get('media') is not None
+            post_hint = post.get('post_hint', '')
 
-            # 콘텐츠에서 영상 URL 추출
-            content_elem = entry.find('atom:content', ns)
-            content = content_elem.text if content_elem is not None else ""
+            # 영상이 아니면 스킵
+            if not is_video and not has_media and post_hint not in ['hosted:video', 'rich:video']:
+                continue
 
+            title = post.get('title', '')
+            permalink = post.get('permalink', '')
+            reddit_url = f"https://www.reddit.com{permalink}" if permalink else ""
+            score = post.get('score', 0)
+
+            # 영상 URL 추출
             video_url = None
 
-            # HTML 콘텐츠에서 영상 링크 찾기
-            if content:
-                soup = BeautifulSoup(content, 'html.parser')
+            # 1. Reddit 호스팅 영상
+            if is_video and post.get('media'):
+                reddit_video = post.get('media', {}).get('reddit_video', {})
+                video_url = reddit_video.get('fallback_url', '')
 
-                # 1. <a> 태그에서 영상 도메인 찾기
-                for link in soup.find_all('a', href=True):
-                    href = link['href']
-                    if any(domain in href for domain in ["v.redd.it", "youtube.com", "youtu.be", "tiktok.com", "imgur.com/", "gfycat.com"]):
-                        video_url = href
-                        break
-
-                # 2. 없으면 Reddit 자체 링크 사용
-                if not video_url and "v.redd.it" in reddit_url:
-                    video_url = reddit_url
-
-            # 영상이 없어도 일단 수집 (Gemini가 텍스트로도 분석 가능)
+            # 2. 외부 영상 링크
             if not video_url:
-                video_url = reddit_url  # Reddit 페이지 링크라도 추가
+                url_field = post.get('url', '')
+                if any(domain in url_field for domain in ["v.redd.it", "youtube.com", "youtu.be", "tiktok.com", "imgur.com", "gfycat.com", "streamable.com"]):
+                    video_url = url_field
+
+            # 3. secure_media에서 추출
+            if not video_url and post.get('secure_media'):
+                reddit_video = post.get('secure_media', {}).get('reddit_video', {})
+                video_url = reddit_video.get('fallback_url', '')
+
+            # 영상 URL이 없으면 스킵
+            if not video_url:
+                continue
 
             posts.append({
                 "title": title,
                 "url": video_url,
                 "reddit_url": reddit_url,
-                "score": 0,  # RSS에는 점수 정보 없음
+                "score": score,
                 "subreddit": subreddit,
                 "platform": platform
             })
 
+            # 필요한 개수만큼 수집하면 종료
+            if len(posts) >= limit:
+                break
+
+        print(f"   📹 영상 게시물 {len(posts)}개 발견")
         return posts
+
     except Exception as e:
         print(f"Error fetching from r/{subreddit}: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 
