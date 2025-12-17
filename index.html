@@ -3,13 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>바이럴 릴스 분석 대시보드</title>
+    <title>Viral Reels Lab - 바이럴 영상 트렌드 분석</title>
+    <meta name="description" content="TikTok, Instagram Reels 바이럴 영상 트렌드를 AI로 분석하여 한국형 콘텐츠 아이디어를 제공합니다.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8245597797545485"
      crossorigin="anonymous"></script>
 
     <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-card: #111111;
+            --bg-hover: #1a1a1a;
+            --border-color: #222222;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-tiktok: #ff0050;
+            --accent-instagram: #e1306c;
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --gradient-tiktok: linear-gradient(135deg, #00f2ea, #ff0050);
+            --gradient-instagram: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,70 +42,186 @@
         }
 
         body {
-            background: #0a0a0a;
-            color: #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .header {
-            background: #121212;
-            border-bottom: 1px solid #1f1f1f;
-            padding: 2rem 0;
-            position: sticky;
+        /* Hero Section */
+        .hero {
+            position: relative;
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
             top: 0;
-            z-index: 100;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
 
-        .header-content {
-            max-width: 1400px;
+        .hero-content {
+            position: relative;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 0 2rem;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 0.5rem;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--accent-purple);
+            margin-bottom: 1.5rem;
         }
 
-        .subtitle {
-            color: #888;
-            font-size: 0.9rem;
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
 
-        .filters {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Stats */
+        .stats {
             display: flex;
-            gap: 0.75rem;
+            justify-content: center;
+            gap: 3rem;
             flex-wrap: wrap;
         }
 
-        .filter-btn {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            color: #e0e0e0;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Platform Filter */
+        .filter-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .platform-tabs {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .platform-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
         }
 
-        .filter-btn:hover {
-            background: #2a2a2a;
-            border-color: #3a3a3a;
+        .platform-tab:hover {
+            background: var(--bg-hover);
+            border-color: #333;
+            transform: translateY(-2px);
         }
 
-        .filter-btn.active {
-            background: #2563eb;
-            border-color: #2563eb;
-            color: #fff;
+        .platform-tab.active {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--text-primary);
         }
 
+        .platform-tab.tiktok.active {
+            border-color: var(--accent-tiktok);
+            background: rgba(255, 0, 80, 0.1);
+        }
+
+        .platform-tab.instagram.active {
+            border-color: var(--accent-instagram);
+            background: rgba(225, 48, 108, 0.1);
+        }
+
+        .platform-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .platform-icon.all {
+            background: var(--gradient-hero);
+        }
+
+        .platform-icon.tiktok {
+            background: #000;
+            border: 1px solid var(--accent-tiktok);
+        }
+
+        .platform-icon.instagram {
+            background: var(--gradient-instagram);
+        }
+
+        /* Main Content */
         #content {
             max-width: 1400px;
             margin: 0 auto;
@@ -91,171 +232,198 @@
             margin-bottom: 3rem;
         }
 
-        .date-badge {
-            display: inline-block;
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
+        .date-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .date-badge::before {
+            content: '📅';
         }
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 1.5rem;
         }
 
+        /* Card Styles */
         .reel-card {
-            background: #121212;
-            border: 1px solid #1f1f1f;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .reel-card:hover {
-            border-color: #2a2a2a;
-            transform: translateY(-2px);
+            border-color: #333;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .card-header {
+        .card-media {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .badges {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge-success {
-            background: #10b981;
-            color: #000;
-        }
-
-        .badge-warning {
-            background: #f59e0b;
-            color: #000;
-        }
-
-        .badge-danger {
-            background: #ef4444;
-            color: #fff;
-        }
-
-        .badge-score {
-            background: #6366f1;
-            color: #fff;
-        }
-
-        .badge-tiktok {
-            background: #000;
-            color: #fff;
-            border: 1px solid #ff0050;
-        }
-
-        .badge-instagram {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            color: #fff;
-        }
-
-        .badge-general {
-            background: #374151;
-            color: #fff;
-        }
-
-        .category-icon {
-            font-size: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 1rem;
-            line-height: 1.4;
-        }
-
-        .video-embed {
-            margin-bottom: 1rem;
-            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             overflow: hidden;
         }
 
-        .video-embed iframe {
-            width: 100%;
-            aspect-ratio: 9/16;
-            max-height: 400px;
-            border: none;
+        .card-media::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
         }
 
-        .video-placeholder {
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            border: 1px solid #3a3a3a;
+        .play-button {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .card-media:hover .play-button {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .platform-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            z-index: 2;
+        }
+
+        .platform-badge.tiktok {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--accent-tiktok);
+            color: #fff;
+        }
+
+        .platform-badge.instagram {
+            background: var(--gradient-instagram);
+            color: #fff;
+        }
+
+        .platform-badge.general {
+            background: rgba(59, 130, 246, 0.8);
+            color: #fff;
+        }
+
+        .score-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 8px;
-            padding: 3rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
         }
 
-        .video-placeholder:hover {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            border-color: #4a4a4a;
+        .score-badge .score {
+            color: #fbbf24;
         }
 
-        .play-icon {
-            display: block;
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
+        .card-body {
+            padding: 1.5rem;
         }
 
-        .play-text {
-            color: #888;
-            font-size: 0.9rem;
-        }
-
-        .card-section {
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #1f1f1f;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .card-section:last-of-type {
-            border-bottom: none;
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
-        .card-section h4 {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
+        .info-item {
+            display: flex;
+            gap: 0.75rem;
         }
 
-        .card-section p {
+        .info-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 0.9rem;
-            color: #d0d0d0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             line-height: 1.5;
         }
 
-        .script-section {
-            background: #0a0a0a;
+        .script-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #1f1f1f;
+            margin-top: 1rem;
         }
 
         .script-header {
@@ -265,1481 +433,325 @@
             margin-bottom: 0.75rem;
         }
 
+        .script-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         .copy-btn {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            color: #e0e0e0;
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
             cursor: pointer;
-            font-size: 0.8rem;
             transition: all 0.2s;
         }
 
         .copy-btn:hover {
-            background: #2a2a2a;
+            background: #222;
+            color: var(--text-primary);
         }
 
         .script-content {
-            background: transparent;
-            border: none;
-            color: #b0b0b0;
             font-size: 0.85rem;
+            color: var(--text-secondary);
             line-height: 1.6;
             white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: 'SF Mono', Monaco, monospace;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
-        .card-footer {
+        .card-actions {
             display: flex;
             gap: 0.75rem;
-            margin-top: 1rem;
+            margin-top: 1.25rem;
         }
 
-        .btn {
+        .action-btn {
             flex: 1;
-            padding: 0.6rem 1rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
             text-decoration: none;
-            text-align: center;
             transition: all 0.2s;
-            display: inline-block;
+            cursor: pointer;
         }
 
-        .btn-primary {
-            background: #2563eb;
+        .action-btn.primary {
+            background: var(--accent-blue);
             color: #fff;
+            border: none;
         }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
+        .action-btn.primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
         }
 
-        .btn-secondary {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            color: #e0e0e0;
+        .action-btn.secondary {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
         }
 
-        .btn-secondary:hover {
-            background: #2a2a2a;
+        .action-btn.secondary:hover {
+            background: #222;
+            color: var(--text-primary);
         }
 
+        /* Footer */
         footer {
-            background: #121212;
-            border-top: 1px solid #1f1f1f;
-            padding: 2rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem;
             text-align: center;
-            color: #666;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-info {
+            color: var(--text-muted);
             font-size: 0.85rem;
         }
 
-        footer a {
-            color: #888;
-            text-decoration: none;
-            margin: 0 1rem;
+        .visitor-count {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
-        footer a:hover {
-            color: #e0e0e0;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            .stats {
+                gap: 2rem;
+            }
+
+            .filter-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .platform-tabs {
+                gap: 0.75rem;
+            }
+
+            .platform-tab {
+                padding: 0.875rem 1.25rem;
+                font-size: 0.9rem;
+            }
+
+            .platform-tab span:last-child {
+                display: none;
+            }
+
             .cards-grid {
                 grid-template-columns: 1fr;
             }
 
-            .filters {
-                padding: 0 1rem;
-            }
-
             #content {
-                padding: 0 1rem 2rem;
+                padding: 0 1rem 3rem;
             }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reel-card {
+            animation: fadeInUp 0.5s ease forwards;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <h1>🎬 바이럴 릴스 분석 대시보드</h1>
-            <p class="subtitle">실전 활용 가능한 릴스 아이디어 · 매일 오전 8시 업데이트</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse"></span>
+                매일 오전 8시 자동 업데이트
+            </div>
+            <h1>Viral Reels Lab</h1>
+            <p>TikTok과 Instagram의 글로벌 바이럴 영상을 AI가 분석하여<br>한국형 숏폼 콘텐츠 아이디어를 제공합니다</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="totalVideos">12+</div>
+                    <div class="stat-label">일일 분석 영상</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">데이터 소스</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">AI</div>
+                    <div class="stat-label">Gemini 2.5 Flash</div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="filters">
-        <button class="filter-btn active" onclick="filterCards('all')">전체</button>
-        <span style="color:#333; margin: 0 0.5rem;">|</span>
-        <button class="filter-btn" onclick="filterCards('platform', 'TikTok')">📱 TikTok</button>
-        <button class="filter-btn" onclick="filterCards('platform', 'Instagram')">📷 Instagram</button>
-        <span style="color:#333; margin: 0 0.5rem;">|</span>
-        <button class="filter-btn" onclick="filterCards('category', 'Faceless')">🎭 얼굴 노출 X</button>
-        <button class="filter-btn" onclick="filterCards('category', 'Skit')">🎬 상황극</button>
-        <button class="filter-btn" onclick="filterCards('category', 'Trend')">🔥 챌린지</button>
-        <button class="filter-btn" onclick="filterCards('category', 'Info')">💡 정보성</button>
-        <button class="filter-btn" onclick="filterCards('difficulty', 'Easy')">초보자 추천</button>
-    </div>
+    <!-- Platform Filter -->
+    <section class="filter-section">
+        <div class="platform-tabs">
+            <button class="platform-tab active" onclick="filterByPlatform('all')">
+                <span class="platform-icon all">🌐</span>
+                <span>전체</span>
+            </button>
+            <button class="platform-tab tiktok" onclick="filterByPlatform('TikTok')">
+                <span class="platform-icon tiktok">📱</span>
+                <span>TikTok</span>
+            </button>
+            <button class="platform-tab instagram" onclick="filterByPlatform('Instagram')">
+                <span class="platform-icon instagram">📷</span>
+                <span>Instagram</span>
+            </button>
+        </div>
+    </section>
 
+    <!-- Main Content -->
     <div id="content">
         <!-- CONTENT_START -->
 
-    <!-- Update: 2025-12-05 08:10:17 -->
-    <div class="date-section">
-      <h2 class="date-badge">2025년 12월 05일 금요일</h2>
-      <div class="cards-grid">
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">교수님이랑 싸운 대학생</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 교수님의 비상식적인 요청을 보여줘서 궁금증을 자극</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 대학 조교와의 갈등으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 교수님의 요청\n장면2: (3-10초) 대학생의 반응\n장면3: (10-15초) 교수님의 반응\n\n자막: \'교수님은 왜 이러실까?\'\n해시태그: #대학생 #교수님 #갈등')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 교수님의 요청
-장면2: (3-10초) 대학생의 반응
-장면3: (10-15초) 교수님의 반응
-
-자막: '교수님은 왜 이러실까?'
-해시태그: #대학생 #교수님 #갈등</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/f22npa7m175g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/f22npa7m175g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">인플루언서의 충격적인 행동</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 인플루언서의 충격적인 행동을 보여줘서 충격을 주고</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 연예인이나 유튜버의 행동으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 인플루언서의 행동\n장면2: (3-10초) 피해者的 반응\n장면3: (10-15초) 결과\n\n자막: \'인플루언서의 행동은 옳은가?\'\n해시태그: #인플루언서 #충격 #행동')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 인플루언서의 행동
-장면2: (3-10초) 피해者的 반응
-장면3: (10-15초) 결과
-
-자막: '인플루언서의 행동은 옳은가?'
-해시태그: #인플루언서 #충격 #행동</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/egt35giyu65g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/egt35giyu65g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 7/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">믿을 수 없는 현실</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 믿을 수 없는 현실을 보여줘서 궁금증을 자극</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 日常생활의 이상한 상황으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 현실\n장면2: (3-10초) 설명\n장면3: (10-15초) 반응\n\n자막: \'이건 정말 말이 되나?\'\n해시태그: #현실 #믿을수없다 #일상')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 현실
-장면2: (3-10초) 설명
-장면3: (10-15초) 반응
-
-자막: '이건 정말 말이 되나?'
-해시태그: #현실 #믿을수없다 #일상</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/i045yugvr25g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/i045yugvr25g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 6/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">매력적인 딸의 행동</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 딸의 매력적인 행동을 보여줘서 웃음을 자극</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 자녀와의 유쾌한 상황으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 딸의 행동\n장면2: (3-10초) 설명\n장면3: (10-15초) 반응\n\n자막: \'딸의 매력적인 행동\'\n해시태그: #딸 #매력 #행동')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 딸의 행동
-장면2: (3-10초) 설명
-장면3: (10-15초) 반응
-
-자막: '딸의 매력적인 행동'
-해시태그: #딸 #매력 #행동</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://www.reddit.com/r/funny/comments/1pdk5eo/oc_my_sassy_teen_daughter_put_up_our_let_it_snow/" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://www.reddit.com/r/funny/comments/1pdk5eo/oc_my_sassy_teen_daughter_put_up_our_let_it_snow/" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 5/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">대장내시경前的 준비</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 대장내시경前的 준비를 보여줘서 웃음을 자극</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 건강검진前的 준비로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 준비\n장면2: (3-10초) 설명\n장면3: (10-15초) 결과\n\n자막: \'대장내시경前的 준비\'\n해시태그: #대장내시경 #준비 #건강')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 준비
-장면2: (3-10초) 설명
-장면3: (10-15초) 결과
-
-자막: '대장내시경前的 준비'
-해시태그: #대장내시경 #준비 #건강</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/2h3aqw4nn65g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/2h3aqw4nn65g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 4/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">축구의 신비</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 축구의 신비를 보여줘서 궁금증을 자극</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 다른 스포츠로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 축구의 신비\n장면2: (3-10초) 설명\n장면3: (10-15초) 반응\n\n자막: \'축구의 신비\'\n해시태그: #축구 #신비 #스포츠')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 축구의 신비
-장면2: (3-10초) 설명
-장면3: (10-15초) 반응
-
-자막: '축구의 신비'
-해시태그: #축구 #신비 #스포츠</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/hoza4wd2b35g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/hoza4wd2b35g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Update: 2025-12-04 08:08:50 -->
-    <div class="date-section">
-      <h2 class="date-badge">2025년 12월 04일 목요일</h2>
-      <div class="cards-grid">
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">블랙 프라이데이 대란</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 가격 인상으로 인한 충격을 자극해서 터짐</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 세일 대란으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 가격표 지우는 장면\n장면2: (3-10초) 가격 인상으로 인한 고객 반응\n장면3: (10-15초) 충격의 마무리\n\n자막: \'블랙 프라이데이 대란\'\n해시태그: #블랙프라이데이 #대란 #세일')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 가격표 지우는 장면
-장면2: (3-10초) 가격 인상으로 인한 고객 반응
-장면3: (10-15초) 충격의 마무리
-
-자막: '블랙 프라이데이 대란'
-해시태그: #블랙프라이데이 #대란 #세일</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/mfogk2vfu05g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/mfogk2vfu05g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">개가 주인 실화</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 개의 돌발 행동으로 터짐</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 개 대신 다른 애완동물로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 개의 돌발 행동\n장면2: (3-10초) 주인의 반응\n장면3: (10-15초) 마무리\n\n자막: \'개가 주인 실화\'\n해시태그: #개 #애완동물 #실화')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 개의 돌발 행동
-장면2: (3-10초) 주인의 반응
-장면3: (10-15초) 마무리
-
-자막: '개가 주인 실화'
-해시태그: #개 #애완동물 #실화</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/63b6bo9fc15g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/63b6bo9fc15g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 7/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">아동 실종 대소동</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 아동 실종으로 인한 충격을 자극해서 터짐</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 다른 상황으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 아동 실종 장면\n장면2: (3-10초) 부모의 반응\n장면3: (10-15초) 마무리\n\n자막: \'아동 실종 대소동\'\n해시태그: #아동실종 #대소동')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 아동 실종 장면
-장면2: (3-10초) 부모의 반응
-장면3: (10-15초) 마무리
-
-자막: '아동 실종 대소동'
-해시태그: #아동실종 #대소동</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/ez96ibngv05g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/ez96ibngv05g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 6/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">彼女의 최선을 다한 노력</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 그녀의 노력을 자극해서 터짐</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 다른 상황으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 그녀의 노력 장면\n장면2: (3-10초) 결과\n장면3: (10-15초) 마무리\n\n자막: \'彼女의 최선을 다한 노력\'\n해시태그: #노력 #결과')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 그녀의 노력 장면
-장면2: (3-10초) 결과
-장면3: (10-15초) 마무리
-
-자막: '彼女의 최선을 다한 노력'
-해시태그: #노력 #결과</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/rzf222ggfw4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/rzf222ggfw4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">휠이 있는 곳에 길이 있다</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 휠을 이용한 해결책을 자극해서 터짐</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 다른 상황으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 휠을 이용한 해결책 장면\n장면2: (3-10초) 결과\n장면3: (10-15초) 마무리\n\n자막: \'휠이 있는 곳에 길이 있다\'\n해시태그: #휠 #해결책')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 휠을 이용한 해결책 장면
-장면2: (3-10초) 결과
-장면3: (10-15초) 마무리
-
-자막: '휠이 있는 곳에 길이 있다'
-해시태그: #휠 #해결책</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/ba332x7hx05g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/ba332x7hx05g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">그들은 아직 생각하지 못했다</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 그들의 실수를 자극해서 터짐</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 다른 상황으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 그들의 실수 장면\n장면2: (3-10초) 결과\n장면3: (10-15초) 마무리\n\n자막: \'그들은 아직 생각하지 못했다\'\n해시태그: #실수 #결과')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 그들의 실수 장면
-장면2: (3-10초) 결과
-장면3: (10-15초) 마무리
-
-자막: '그들은 아직 생각하지 못했다'
-해시태그: #실수 #결과</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/jselnh0pjz4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/jselnh0pjz4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Update: 2025-12-03 08:09:34 -->
-    <div class="date-section">
-      <h2 class="date-badge">2025년 12월 03일 수요일</h2>
-      <div class="cards-grid">
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 7/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">모던 시트콤 패러디</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 익숙한 상황을 패러디해서 웃음 유도</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 현대적인 일상生活을 패러디하면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 현대적인 상황 설정\n장면2: (3-10초) 익숙한 상황을 엽기적으로 전개\n장면3: (10-15초) 웃음 유도하는 마무리\n\n자막: \'일상生活의 유머\'\n해시태그: #모던시트콤 #패러디 #일상생활')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 현대적인 상황 설정
-장면2: (3-10초) 익숙한 상황을 엽기적으로 전개
-장면3: (10-15초) 웃음 유도하는 마무리
-
-자막: '일상生活의 유머'
-해시태그: #모던시트콤 #패러디 #일상생활</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://www.reddit.com/r/TikTokCringe/" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/1gyxhlssxp4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">도서 금지에 반대하는 학생</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 학생의 열정적인 연설로 관심 유도</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 교육과 자유에 관한 발언으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 학생의 열정적인 연설\n장면2: (3-10초) 성인들의 반応을 보여주는 장면\n장면3: (10-15초) 학생의 메시지 강조\n\n자막: \'교육과 자유\'\n해시태그: #교육 #자유 #도서금지')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 학생의 열정적인 연설
-장면2: (3-10초) 성인들의 반応을 보여주는 장면
-장면3: (10-15초) 학생의 메시지 강조
-
-자막: '교육과 자유'
-해시태그: #교육 #자유 #도서금지</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://www.reddit.com/r/TikTokCringe/" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/z543haydpu4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Trend" data-difficulty="Hard">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-danger">Hard</span>
-                    <span class="badge badge-score">바이럴 6/10</span>
-                </div>
-                <span class="category-icon">🔥</span>
-            </div>
-            <h3 class="card-title">카메라 없이 무슨 일을 할까?</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 궁금증을 자극해서 관심 유도</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 특정 상황에서 카메라 없이 무슨 일을 할지 상상하는 것으로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 궁금증을 자극하는 질문\n장면2: (3-10초) 다양한 상황을 보여주는 장면\n장면3: (10-15초) 결말을 암시하는 장면\n\n자막: \'카메라 없이\'\n해시태그: #카메라없이 #무슨일할까 #트렌드')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 궁금증을 자극하는 질문
-장면2: (3-10초) 다양한 상황을 보여주는 장면
-장면3: (10-15초) 결말을 암시하는 장면
-
-자막: '카메라 없이'
-해시태그: #카메라없이 #무슨일할까 #트렌드</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://www.reddit.com/r/TikTokCringe/" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/wu6p2c7att4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Update: 2025-12-02 08:09:54 -->
-    <div class="date-section">
-      <h2 class="date-badge">2025년 12월 02일 화요일</h2>
-      <div class="cards-grid">
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">15초 반동으로 탈출 실패</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 급격한 상황 전환으로 웃김</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 예쁜 강아지나 고양이로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 선수가 발을 뻗는 장면\n장면2: (3-10초) 상대 선수가追赶하는 장면\n장면3: (10-15초) 선수가 탈출 실패하는 장면\n\n자막: \'탈출 실패\'\n해시태그: #펜타곤 #탈출실패 #웃긴영상')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 선수가 발을 뻗는 장면
-장면2: (3-10초) 상대 선수가追赶하는 장면
-장면3: (10-15초) 선수가 탈출 실패하는 장면
-
-자막: '탈출 실패'
-해시태그: #펜타곤 #탈출실패 #웃긴영상</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/3wd2zup2yl4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/3wd2zup2yl4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">버스 출산</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 버스가 출산하는 상황으로 웃김</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 버스 대신 택시나 지하철로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 버스가 출산하는 장면\n장면2: (3-10초) 사람들의反应하는 장면\n장면3: (10-15초) 버스가 새끼를 낳는 장면\n\n자막: \'버스 출산\'\n해시태그: #버스 #출산 #웃긴영상')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 버스가 출산하는 장면
-장면2: (3-10초) 사람들의反应하는 장면
-장면3: (10-15초) 버스가 새끼를 낳는 장면
-
-자막: '버스 출산'
-해시태그: #버스 #출산 #웃긴영상</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/iw1lyca97l4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/iw1lyca97l4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Info" data-difficulty="Hard">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-danger">Hard</span>
-                    <span class="badge badge-score">바이럴 7/10</span>
-                </div>
-                <span class="category-icon">💡</span>
-            </div>
-            <h3 class="card-title">한번뿐인 라이프</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 인생의 중요성을 강조해서 웃지 않음</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 게임이나 영화로 바꾸면 좋음</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 인생의 중요성을 강조하는 장면\n장면2: (3-10초) 인생의 다양한 상황을 보여주는 장면\n장면3: (10-15초) 인생의 결론을 내리는 장면\n\n자막: \'인생은 한번뿐\'\n해시태그: #인생 #한번뿐 #감동')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 인생의 중요성을 강조하는 장면
-장면2: (3-10초) 인생의 다양한 상황을 보여주는 장면
-장면3: (10-15초) 인생의 결론을 내리는 장면
-
-자막: '인생은 한번뿐'
-해시태그: #인생 #한번뿐 #감동</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/g88oq7issm4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/g88oq7issm4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Update: 2025-12-01 08:09:22 -->
-    <div class="date-section">
-      <h2 class="date-badge">2025년 12월 01일 월요일</h2>
-      <div class="cards-grid">
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 6/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">아이패드 세대, 과한 성적화</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 과한 성적화 문제를 제기</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 청소년 보호 법안을 언급</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) \'아이패드 세대, 과한 성적화\'\n장면2: (3-10초) 문제점 설명\n장면3: (10-15초) 해결 방안 제시\n\n자막: \'아이패드 세대, 과한 성적화\'\n해시태그: #아이패드세대 #과한성적화 #청소년보호')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) '아이패드 세대, 과한 성적화'
-장면2: (3-10초) 문제점 설명
-장면3: (10-15초) 해결 방안 제시
-
-자막: '아이패드 세대, 과한 성적화'
-해시태그: #아이패드세대 #과한성적화 #청소년보호</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/kedher74fb4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/kedher74fb4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">랜덤 아이템을 가지고 오는 날</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 랜덤 아이템을 보여줌</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 회사에서 사용하는 아이템을 사용</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) \'랜덤 아이템\'\n장면2: (3-10초) 아이템 사용 상황극\n장면3: (10-15초) 상황극 마무리\n\n자막: \'랜덤 아이템 챌린지\'\n해시태그: #랜덤아이템 #챌린지 #회사생활')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) '랜덤 아이템'
-장면2: (3-10초) 아이템 사용 상황극
-장면3: (10-15초) 상황극 마무리
-
-자막: '랜덤 아이템 챌린지'
-해시태그: #랜덤아이템 #챌린지 #회사생활</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/e6kyyuzq1g4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/e6kyyuzq1g4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">공포의 자동차</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 공포의 자동차를 보여줌</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 한국식 자동차를 사용</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) \'공포의 자동차\'\n장면2: (3-10초) 자동차의 특징 설명\n장면3: (10-15초) 자동차의 반응\n\n자막: \'공포의 자동차\'\n해시태그: #공포의자동차 #자동차 #한국汽车')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) '공포의 자동차'
-장면2: (3-10초) 자동차의 특징 설명
-장면3: (10-15초) 자동차의 반응
-
-자막: '공포의 자동차'
-해시태그: #공포의자동차 #자동차 #한국汽车</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/ok9dd01f3a4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/ok9dd01f3a4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 7/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">아빠가 화내지 않는 날</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 아빠의 반응을 보여줌</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 아버지의 날을 언급</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) \'아빠가 화내지 않는 날\'\n장면2: (3-10초) 아빠의 반응 상황극\n장면3: (10-15초) 상황극 마무리\n\n자막: \'아빠가 화내지 않는 날\'\n해시태그: #아빠가화내지않는날 #아버지의날 #가족')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) '아빠가 화내지 않는 날'
-장면2: (3-10초) 아빠의 반응 상황극
-장면3: (10-15초) 상황극 마무리
-
-자막: '아빠가 화내지 않는 날'
-해시태그: #아빠가화내지않는날 #아버지의날 #가족</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://www.reddit.com/r/funny/comments/1pakec1/dads_not_mad/" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://www.reddit.com/r/funny/comments/1pakec1/dads_not_mad/" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Info" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">💡</span>
-            </div>
-            <h3 class="card-title">밥까기 최고의 튜토리얼</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 밥까기 튜토리얼을 보여줌</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 한국식 밥까기 방법을 사용</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) \'밥까기 튜토리얼\'\n장면2: (3-10초) 밥까기 방법 설명\n장면3: (10-15초) 마무리\n\n자막: \'밥까기 튜토리얼\'\n해시태그: #밥까기 #튜토리얼 #한국식')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) '밥까기 튜토리얼'
-장면2: (3-10초) 밥까기 방법 설명
-장면3: (10-15초) 마무리
-
-자막: '밥까기 튜토리얼'
-해시태그: #밥까기 #튜토리얼 #한국식</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/5asrm0rqhd4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/5asrm0rqhd4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">아르헨티나에서 발견한宝石</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>첫 3초에 아르헨티나에서 발견한寶石을 보여줌</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 한국에서 발견한寶石을 사용</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) \'아르헨티나에서 발견한寶石\'\n장면2: (3-10초) 寶石의 특징 설명\n장면3: (10-15초) 寶石의 반응\n\n자막: \'아르헨티나에서 발견한寶石\'\n해시태그: #아르헨티나 #寶石 #한국에서발견한寶石')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) '아르헨티나에서 발견한寶石'
-장면2: (3-10초) 寶石의 특징 설명
-장면3: (10-15초) 寶石의 반응
-
-자막: '아르헨티나에서 발견한寶石'
-해시태그: #아르헨티나 #寶石 #한국에서발견한寶石</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/f6q3gxf51g4g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/f6q3gxf51g4g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Update: 2025-11-30 08:09:21 -->
-    <div class="date-section">
-      <h2 class="date-badge">2025년 11월 30일 일요일</h2>
-      <div class="cards-grid">
-
-        <div class="reel-card" data-category="Info" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 6/10</span>
-                </div>
-                <span class="category-icon">💡</span>
-            </div>
-            <h3 class="card-title">알쏭달쏭 오소리의 비밀</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>오소리란 동물을 처음 본다면</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 고래 또는 펭귄과 같은 동물로 대체</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 오소리란 무엇인가\n장면2: (3-10초) 오소리의 특징\n장면3: (10-15초)驚異的な 오소리의 능력\n\n자막: \'오소리의 비밀\'\n해시태그: #오소리 #동물 #비밀')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 오소리란 무엇인가
-장면2: (3-10초) 오소리의 특징
-장면3: (10-15초)驚異的な 오소리의 능력
-
-자막: '오소리의 비밀'
-해시태그: #오소리 #동물 #비밀</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/psi52t63t44g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/psi52t63t44g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">놀이터에서 발생한 황당한 상황</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>어떤 아버지가 딸을 기다리며</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 놀이터에서 발생한 황당한 상황으로 대체</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 아버지가 딸을 기다리는 장면\n장면2: (3-10초) 황당한 상황 발생\n장면3: (10-15초) 아버지의 반응\n\n자막: \'놀이터에서 발생한 황당한 상황\'\n해시태그: #놀이터 #아버지 #황당')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 아버지가 딸을 기다리는 장면
-장면2: (3-10초) 황당한 상황 발생
-장면3: (10-15초) 아버지의 반응
-
-자막: '놀이터에서 발생한 황당한 상황'
-해시태그: #놀이터 #아버지 #황당</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/l429oir3s64g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/l429oir3s64g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Hard">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-danger">Hard</span>
-                    <span class="badge badge-score">바이럴 9/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">마세이즈 데이 패러드의 황당한 상황</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>마세이즈 데이 패러드에서 발생한 황당한 상황</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 설날 또는 추석 등으로 대체</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 마세이즈 데이 패러드 장면\n장면2: (3-10초) 황당한 상황 발생\n장면3: (10-15초) 사람들의 반응\n\n자막: \'마세이즈 데이 패러드의 황당한 상황\'\n해시태그: #마세이즈데이패러드 #황당 #시트콤')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 마세이즈 데이 패러드 장면
-장면2: (3-10초) 황당한 상황 발생
-장면3: (10-15초) 사람들의 반응
-
-자막: '마세이즈 데이 패러드의 황당한 상황'
-해시태그: #마세이즈데이패러드 #황당 #시트콤</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/5f1ycuefl84g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/5f1ycuefl84g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 7/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">감사합니다, 게임</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>게임을 하는 사람들이 느끼는 감정</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 게임과 관련된 밈 또는 음원으로 대체</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 게임 장면\n장면2: (3-10초) 감사의 메시지\n장면3: (10-15초) 게임의 재미\n\n자막: \'게임의 재미\'\n해시태그: #게임 #감사 #재미')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 게임 장면
-장면2: (3-10초) 감사의 메시지
-장면3: (10-15초) 게임의 재미
-
-자막: '게임의 재미'
-해시태그: #게임 #감사 #재미</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/8v2imhwis74g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/8v2imhwis74g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Faceless" data-difficulty="Easy">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-success">Easy</span>
-                    <span class="badge badge-score">바이럴 5/10</span>
-                </div>
-                <span class="category-icon">🎭</span>
-            </div>
-            <h3 class="card-title">커피를 만들었어</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>커피를 만드는 사람의 생각</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 차 또는 음료와 관련된 밈 또는 음원으로 대체</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 커피 만들기 장면\n장면2: (3-10초) 커피의 특징\n장면3: (10-15초) 커피의 맛\n\n자막: \'커피의 맛\'\n해시태그: #커피 #음료 #맛')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 커피 만들기 장면
-장면2: (3-10초) 커피의 특징
-장면3: (10-15초) 커피의 맛
-
-자막: '커피의 맛'
-해시태그: #커피 #음료 #맛</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://www.reddit.com/r/funny/comments/1p9g4s0/i_made_coffee_this_morning/" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://www.reddit.com/r/funny/comments/1p9g4s0/i_made_coffee_this_morning/" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-        <div class="reel-card" data-category="Skit" data-difficulty="Medium">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge badge-warning">Medium</span>
-                    <span class="badge badge-score">바이럴 8/10</span>
-                </div>
-                <span class="category-icon">🎬</span>
-            </div>
-            <h3 class="card-title">10초도 안 된 게임</h3>
-
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>게임을 하는 사람들이 느끼는 감정</p>
-            </div>
-
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>한국에서는 게임과 관련된 밈 또는 음원으로 대체</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('장면1: (0-3초) 게임 장면\n장면2: (3-10초) 게임의 재미\n장면3: (10-15초) 게임의 감동\n\n자막: \'게임의 감동\'\n해시태그: #게임 #감동 #재미')">
-                        📋 복사
-                    </button>
-                </div>
-                <pre class="script-content">장면1: (0-3초) 게임 장면
-장면2: (3-10초) 게임의 재미
-장면3: (10-15초) 게임의 감동
-
-자막: '게임의 감동'
-해시태그: #게임 #감동 #재미</pre>
-            </div>
-
-            <div class="card-footer">
-                <a href="https://v.redd.it/dcbacn4l374g1" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="https://v.redd.it/dcbacn4l374g1" class="btn btn-primary" target="_blank">영상 보기</a>
-            </div>
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- 여기에 새로운 콘텐츠가 추가됩니다 -->
+        <!-- 여기에 새로운 콘텐츠가 추가됩니다 -->
 
     </div>
 
+    <!-- Footer -->
     <footer>
-        <div>
-            <a href="https://www.instagram.com/reels_code_official" target="_blank">📷 Instagram</a>
-            <a href="https://www.threads.com/@reels_code_official" target="_blank">🧵 Threads</a>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://www.instagram.com/reels_code_official" target="_blank">
+                    📷 Instagram
+                </a>
+                <a href="https://www.threads.com/@reels_code_official" target="_blank">
+                    🧵 Threads
+                </a>
+                <a href="/admin.html">
+                    ⚙️ Admin
+                </a>
+            </div>
+            <p class="footer-info">
+                Reddit의 바이럴 영상을 수집하고 Gemini AI로 분석합니다
+            </p>
+            <p class="visitor-count">
+                Total Visitors: <span id="visitorCount">-</span>
+            </p>
         </div>
-        <p style="margin-top: 1rem;">자동 업데이트: 매일 오전 8시 (KST)</p>
-        <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #555;">
-            Total Visitors: <span id="visitorCount">-</span>
-        </p>
     </footer>
 
     <script>
         // 방문자 카운터
         async function trackVisitor() {
             try {
-                // 세션당 한 번만 카운트
                 if (!sessionStorage.getItem('visited')) {
                     await fetch('/api/visitor', { method: 'POST' });
                     sessionStorage.setItem('visited', 'true');
                 }
-
-                // 방문자 수 표시
                 const response = await fetch('/api/visitor');
                 const data = await response.json();
-                document.getElementById('visitorCount').textContent =
-                    data.total?.toLocaleString() || '-';
+                document.getElementById('visitorCount').textContent = data.total?.toLocaleString() || '-';
             } catch (error) {
                 console.log('Visitor tracking unavailable');
             }
         }
         trackVisitor();
 
-        // 필터링 기능
-        function filterCards(filterType, filterValue) {
+        // 플랫폼 필터
+        function filterByPlatform(platform) {
             const cards = document.querySelectorAll('.reel-card');
-            const buttons = document.querySelectorAll('.filter-btn');
+            const tabs = document.querySelectorAll('.platform-tab');
 
-            // 버튼 활성화 상태 변경
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            // 탭 활성화 상태 변경
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.platform-tab').classList.add('active');
 
             // 카드 필터링
             cards.forEach(card => {
-                if (filterType === 'all') {
+                if (platform === 'all') {
                     card.style.display = 'block';
-                } else if (filterType === 'platform') {
-                    card.style.display = card.dataset.platform === filterValue ? 'block' : 'none';
-                } else if (filterType === 'category') {
-                    card.style.display = card.dataset.category === filterValue ? 'block' : 'none';
-                } else if (filterType === 'difficulty') {
-                    card.style.display = card.dataset.difficulty === filterValue ? 'block' : 'none';
+                } else {
+                    const cardPlatform = card.dataset.platform || 'General';
+                    card.style.display = cardPlatform === platform ? 'block' : 'none';
                 }
             });
         }
 
-        // 스크립트 복사 기능
+        // 스크립트 복사
         function copyScript(text) {
             navigator.clipboard.writeText(text).then(() => {
-                event.target.textContent = '✅ 복사됨';
+                const btn = event.target.closest('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ 복사됨';
                 setTimeout(() => {
-                    event.target.textContent = '📋 복사';
+                    btn.innerHTML = originalText;
                 }, 2000);
             }).catch(err => {
                 console.error('복사 실패:', err);
-                alert('복사에 실패했습니다.');
             });
         }
     </script>

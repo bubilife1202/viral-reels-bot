@@ -247,101 +247,76 @@ def remove_old_updates(html_content, current_time, days=7):
 
 
 def generate_video_cards(videos):
-    """비디오 JSON 데이터로 HTML 카드 생성"""
+    """비디오 JSON 데이터로 HTML 카드 생성 (새 디자인)"""
     cards_html = ""
 
-    difficulty_colors = {
-        "Easy": "success",
-        "Medium": "warning",
-        "Hard": "danger"
-    }
-
-    category_icons = {
-        "Faceless": "🎭",
-        "Skit": "🎬",
-        "Trend": "🔥",
-        "Info": "💡"
-    }
-
-    platform_badges = {
-        "TikTok": ("badge-tiktok", "📱 TikTok"),
-        "Instagram": ("badge-instagram", "📷 Instagram"),
-        "General": ("badge-general", "🎬 General")
+    platform_classes = {
+        "TikTok": "tiktok",
+        "Instagram": "instagram",
+        "General": "general"
     }
 
     for video in videos:
-        difficulty = video.get("difficulty", "Medium")
-        category = video.get("category", "Trend")
         platform = video.get("platform", "General")
-        color = difficulty_colors.get(difficulty, "secondary")
-        icon = category_icons.get(category, "🎬")
-        platform_class, platform_label = platform_badges.get(platform, ("badge-general", "🎬 General"))
+        platform_class = platform_classes.get(platform, "general")
+        virality = video.get('virality_score', 5)
 
         # 스크립트를 이스케이프 처리
-        script_escaped = video.get("script", "").replace("'", "\\'").replace("\n", "\\n")
+        script_escaped = video.get("script", "").replace("'", "\\'").replace("\n", "\\n").replace('"', '&quot;')
 
         # 영상 URL
         video_url = video.get('video_url', '#')
-
-        # 영상 임베드 생성 (v.redd.it 영상은 Reddit 플레이어로)
-        video_embed = ""
-        if "v.redd.it" in video_url or "reddit.com" in video_url:
-            # Reddit 영상 임베드
-            reddit_url = video.get('original_url', video_url)
-            video_embed = f'''
-            <div class="video-embed">
-                <div class="video-placeholder" onclick="window.open('{reddit_url}', '_blank')">
-                    <span class="play-icon">▶</span>
-                    <span class="play-text">클릭하여 영상 보기</span>
-                </div>
-            </div>'''
-        elif "youtube.com" in video_url or "youtu.be" in video_url:
-            # YouTube 영상 ID 추출
-            if "youtu.be" in video_url:
-                yt_id = video_url.split("/")[-1].split("?")[0]
-            else:
-                yt_id = video_url.split("v=")[-1].split("&")[0] if "v=" in video_url else ""
-            if yt_id:
-                video_embed = f'''
-            <div class="video-embed">
-                <iframe src="https://www.youtube.com/embed/{yt_id}" frameborder="0" allowfullscreen></iframe>
-            </div>'''
+        original_url = video.get('original_url', video_url)
 
         cards_html += f"""
-        <div class="reel-card" data-category="{category}" data-difficulty="{difficulty}" data-platform="{platform}">
-            <div class="card-header">
-                <div class="badges">
-                    <span class="badge {platform_class}">{platform_label}</span>
-                    <span class="badge badge-{color}">{difficulty}</span>
-                    <span class="badge badge-score">바이럴 {video.get('virality_score', 5)}/10</span>
+        <div class="reel-card" data-platform="{platform}">
+            <div class="card-media" onclick="window.open('{original_url}', '_blank')">
+                <span class="platform-badge {platform_class}">
+                    {'📱' if platform == 'TikTok' else '📷' if platform == 'Instagram' else '🎬'} {platform}
+                </span>
+                <span class="score-badge">
+                    <span class="score">★</span> {virality}/10
+                </span>
+                <div class="play-button">▶</div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{video.get('title', '제목 없음')}</h3>
+
+                <div class="card-info">
+                    <div class="info-item">
+                        <span class="info-icon">🎯</span>
+                        <div class="info-content">
+                            <div class="info-label">바이럴 포인트</div>
+                            <div class="info-text">{video.get('hook_point', '분석 중...')}</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🇰🇷</span>
+                        <div class="info-content">
+                            <div class="info-label">한국화 제안</div>
+                            <div class="info-text">{video.get('korean_patch', '원본 그대로 사용 가능')}</div>
+                        </div>
+                    </div>
                 </div>
-                <span class="category-icon">{icon}</span>
-            </div>
-            <h3 class="card-title">{video.get('title', '제목 없음')}</h3>
-            {video_embed}
-            <div class="card-section">
-                <h4>🎯 바이럴 포인트</h4>
-                <p>{video.get('hook_point', '분석 중...')}</p>
-            </div>
 
-            <div class="card-section">
-                <h4>🇰🇷 한국화 제안</h4>
-                <p>{video.get('korean_patch', '원본 그대로 사용 가능')}</p>
-            </div>
-
-            <div class="card-section script-section">
-                <div class="script-header">
-                    <h4>📝 스크립트</h4>
-                    <button class="copy-btn" onclick="copyScript('{script_escaped}')">
-                        📋 복사
-                    </button>
+                <div class="script-box">
+                    <div class="script-header">
+                        <span class="script-title">📝 스크립트</span>
+                        <button class="copy-btn" onclick="copyScript('{script_escaped}')">
+                            📋 복사
+                        </button>
+                    </div>
+                    <pre class="script-content">{video.get('script', '스크립트 없음')}</pre>
                 </div>
-                <pre class="script-content">{video.get('script', '스크립트 없음')}</pre>
-            </div>
 
-            <div class="card-footer">
-                <a href="{video.get('original_url', '#')}" class="btn btn-secondary" target="_blank">원본 보기</a>
-                <a href="{video.get('video_url', '#')}" class="btn btn-primary" target="_blank">영상 보기</a>
+                <div class="card-actions">
+                    <a href="{original_url}" class="action-btn secondary" target="_blank">
+                        🔗 원본
+                    </a>
+                    <a href="{video_url}" class="action-btn primary" target="_blank">
+                        ▶ 영상 보기
+                    </a>
+                </div>
             </div>
         </div>
 """
