@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - 바이럴 릴스 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* 로그인 폼 */
+        .login-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: #121212;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #2563eb;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* 대시보드 */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .logout-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #121212;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-card .value.highlight {
+            color: #2563eb;
+        }
+
+        .section {
+            background: #121212;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .config-item .label {
+            color: #888;
+        }
+
+        .config-item .value {
+            color: #e0e0e0;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        /* 차트 스타일 */
+        .chart-container {
+            margin-top: 1rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-bar .date {
+            width: 100px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .chart-bar .bar-wrapper {
+            flex: 1;
+            background: #1a1a1a;
+            border-radius: 4px;
+            height: 24px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+
+        .chart-bar .bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #6366f1);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-bar .count {
+            width: 50px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #e0e0e0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: #e0e0e0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #888;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 로그인 폼 -->
+        <div class="login-container" id="loginForm">
+            <h2>Admin Login</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="adminKey">Admin Key</label>
+                    <input type="password" id="adminKey" placeholder="Enter admin key" required>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Login</button>
+            </form>
+            <p class="error-msg" id="errorMsg"></p>
+        </div>
+
+        <!-- 대시보드 -->
+        <div class="dashboard" id="dashboard">
+            <div class="header">
+                <h1>Admin Dashboard</h1>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Visitors</h3>
+                    <div class="value highlight" id="totalVisitors">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Today</h3>
+                    <div class="value" id="todayVisitors">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Gemini Model</h3>
+                    <div class="value" id="geminiModel" style="font-size: 1rem;">-</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Weekly Visitors</h2>
+                <div class="chart-container" id="weeklyChart">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Configuration</h2>
+                <div class="config-item">
+                    <span class="label">AI Model</span>
+                    <span class="value">gemini-2.5-flash</span>
+                </div>
+                <div class="config-item">
+                    <span class="label">Update Schedule</span>
+                    <span class="value">Daily 08:00 KST</span>
+                </div>
+                <div class="config-item">
+                    <span class="label">Data Sources</span>
+                    <span class="value">Reddit RSS</span>
+                </div>
+                <div class="config-item">
+                    <span class="label">Last Updated</span>
+                    <span class="value" id="lastUpdated">-</span>
+                </div>
+            </div>
+
+            <a href="/" class="back-link">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = null;
+
+        // 세션 체크
+        function checkSession() {
+            const savedToken = sessionStorage.getItem('adminToken');
+            if (savedToken) {
+                adminToken = savedToken;
+                showDashboard();
+            }
+        }
+
+        // 로그인 처리
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            const key = document.getElementById('adminKey').value;
+            const btn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('errorMsg');
+
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+            errorMsg.textContent = '';
+
+            try {
+                const response = await fetch('/api/admin-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    adminToken = key;
+                    sessionStorage.setItem('adminToken', key);
+                    showDashboard();
+                } else {
+                    errorMsg.textContent = data.error || 'Authentication failed';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Connection error. Please try again.';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        }
+
+        // 대시보드 표시
+        async function showDashboard() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+
+            await loadStats();
+        }
+
+        // 통계 로드
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/config', {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                // 총 방문자 수
+                document.getElementById('totalVisitors').textContent =
+                    data.stats?.total?.toLocaleString() || '0';
+
+                // 오늘 방문자 수
+                const todayStats = data.stats?.daily?.find(d =>
+                    d.date === new Date().toISOString().split('T')[0]
+                );
+                document.getElementById('todayVisitors').textContent =
+                    todayStats?.visitors?.toLocaleString() || '0';
+
+                // Gemini 모델
+                document.getElementById('geminiModel').textContent =
+                    data.geminiModel || 'gemini-2.5-flash';
+
+                // 마지막 업데이트
+                document.getElementById('lastUpdated').textContent =
+                    new Date(data.lastUpdated).toLocaleString('ko-KR');
+
+                // 주간 차트 렌더링
+                renderWeeklyChart(data.stats?.daily || []);
+
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // 주간 차트 렌더링
+        function renderWeeklyChart(daily) {
+            const container = document.getElementById('weeklyChart');
+            const maxCount = Math.max(...daily.map(d => d.visitors), 1);
+
+            let html = '';
+            daily.forEach(item => {
+                const percentage = (item.visitors / maxCount) * 100;
+                const dateStr = new Date(item.date).toLocaleDateString('ko-KR', {
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                html += `
+                    <div class="chart-bar">
+                        <span class="date">${dateStr}</span>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="count">${item.visitors.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html || '<div class="loading">No data available</div>';
+        }
+
+        // 로그아웃
+        function logout() {
+            adminToken = null;
+            sessionStorage.removeItem('adminToken');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('adminKey').value = '';
+        }
+
+        // 페이지 로드 시 세션 체크
+        checkSession();
+    </script>
+</body>
+</html>

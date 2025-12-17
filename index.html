@@ -1622,9 +1622,32 @@
             <a href="https://www.threads.com/@reels_code_official" target="_blank">🧵 Threads</a>
         </div>
         <p style="margin-top: 1rem;">자동 업데이트: 매일 오전 8시 (KST)</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #555;">
+            Total Visitors: <span id="visitorCount">-</span>
+        </p>
     </footer>
 
     <script>
+        // 방문자 카운터
+        async function trackVisitor() {
+            try {
+                // 세션당 한 번만 카운트
+                if (!sessionStorage.getItem('visited')) {
+                    await fetch('/api/visitor', { method: 'POST' });
+                    sessionStorage.setItem('visited', 'true');
+                }
+
+                // 방문자 수 표시
+                const response = await fetch('/api/visitor');
+                const data = await response.json();
+                document.getElementById('visitorCount').textContent =
+                    data.total?.toLocaleString() || '-';
+            } catch (error) {
+                console.log('Visitor tracking unavailable');
+            }
+        }
+        trackVisitor();
+
         // 필터링 기능
         function filterCards(filter) {
             const cards = document.querySelectorAll('.reel-card');
