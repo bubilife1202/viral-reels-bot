@@ -15,13 +15,16 @@ from bs4 import BeautifulSoup
 import re
 
 # 설정
-# 플랫폼별 서브레딧 설정
+# 플랫폼별 서브레딧 설정 (활성화된 서브레딧만 사용)
 SUBREDDIT_CONFIG = [
-    {"subreddit": "TikTokCringe", "platform": "TikTok", "limit": 3},
-    {"subreddit": "tiktoks", "platform": "TikTok", "limit": 2},
-    {"subreddit": "Instagramreels", "platform": "Instagram", "limit": 3},
-    {"subreddit": "reelsinstagram", "platform": "Instagram", "limit": 2},
-    {"subreddit": "funny", "platform": "General", "limit": 2},
+    # TikTok 관련 (검증된 서브레딧)
+    {"subreddit": "TikTokCringe", "platform": "TikTok", "limit": 4},
+    {"subreddit": "TikTok", "platform": "TikTok", "limit": 3},
+    # Instagram/Reels 관련 (바이럴 영상 서브레딧)
+    {"subreddit": "Unexpected", "platform": "Instagram", "limit": 3},
+    {"subreddit": "BetterEveryLoop", "platform": "Instagram", "limit": 2},
+    # General 바이럴
+    {"subreddit": "funny", "platform": "General", "limit": 3},
 ]
 GEMINI_MODEL = "gemini-2.5-flash"  # Google Gemini 2.5 Flash
 HTML_FILE = "index.html"
