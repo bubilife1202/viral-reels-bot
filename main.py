@@ -31,7 +31,7 @@ HTML_FILE = "index.html"
 def get_reddit_top_posts(subreddit, limit=3, platform="General"):
     """Reddit에서 인기 게시물 가져오기 (JSON API 사용)"""
     # JSON API 사용 (더 안정적이고 최신 데이터)
-    url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit={limit * 2}"
+    url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit={limit * 5}"
 
     try:
         # 요청 간 딜레이 추가 (Reddit API 정책 준수)
@@ -51,8 +51,28 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             return []
 
         posts = []
+        current_time = time.time()
+
         for child in children:
             post = child.get('data', {})
+
+            # 삭제된 게시물 스킵
+            title = post.get('title', '')
+            author = post.get('author', '')
+            selftext = post.get('selftext', '')
+
+            if author in ['[deleted]', '[removed]']:
+                continue
+            if title in ['[deleted]', '[removed]', '[deleted by user]']:
+                continue
+            if selftext in ['[deleted]', '[removed]']:
+                continue
+
+            # 48시간 이내 게시물만
+            created_utc = post.get('created_utc', 0)
+            age_hours = (current_time - created_utc) / 3600
+            if age_hours > 48:
+                continue
 
             # 영상 게시물만 필터링
             is_video = post.get('is_video', False)
@@ -63,7 +83,6 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             if not is_video and not has_media and post_hint not in ['hosted:video', 'rich:video']:
                 continue
 
-            title = post.get('title', '')
             permalink = post.get('permalink', '')
             reddit_url = f"https://www.reddit.com{permalink}" if permalink else ""
             score = post.get('score', 0)
