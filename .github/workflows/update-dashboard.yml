@@ -1,6 +1,8 @@
 name: Update Viral Reels Dashboard
 
 on:
+  push:
+    branches: [main, master, claude/*]
   schedule:
     # 매일 한국시간 오전 8시 (UTC 전날 23시)
     # 예: UTC 11/19 23:00 = KST 11/20 08:00
