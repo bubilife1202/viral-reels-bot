@@ -54,7 +54,19 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
         current_time = time.time()
 
         for child in children:
+            # 광고/프로모션 게시물 스킵
+            if child.get('kind') != 't3':  # t3 = 일반 게시물
+                continue
+
             post = child.get('data', {})
+
+            # 프로모션/고정 게시물 스킵
+            if post.get('stickied', False):
+                continue
+            if post.get('promoted', False):
+                continue
+            if post.get('is_reddit_media_domain') == False and post.get('is_self') == True:
+                continue
 
             # 삭제된 게시물 스킵
             title = post.get('title', '')
@@ -66,6 +78,11 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             if title in ['[deleted]', '[removed]', '[deleted by user]']:
                 continue
             if selftext in ['[deleted]', '[removed]']:
+                continue
+
+            # 광고성 키워드 필터링
+            ad_keywords = ['광고', 'AD', 'Sponsored', 'promoted', '투자', '가입', '할인', '무료체험']
+            if any(kw.lower() in title.lower() for kw in ad_keywords):
                 continue
 
             # 48시간 이내 게시물만
