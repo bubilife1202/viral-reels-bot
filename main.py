@@ -16,13 +16,13 @@ from google.genai import types
 # 플랫폼별 서브레딧 설정 (활성화된 서브레딧만 사용)
 SUBREDDIT_CONFIG = [
     # TikTok 관련 (검증된 서브레딧)
-    {"subreddit": "TikTokCringe", "platform": "TikTok", "limit": 4},
-    {"subreddit": "TikTok", "platform": "TikTok", "limit": 3},
-    # Instagram/Reels 관련 (바이럴 영상 서브레딧)
-    {"subreddit": "Unexpected", "platform": "Instagram", "limit": 3},
-    {"subreddit": "BetterEveryLoop", "platform": "Instagram", "limit": 2},
-    # General 바이럴
-    {"subreddit": "funny", "platform": "General", "limit": 3},
+    {"subreddit": "TikTokCringe", "platform": "TikTok", "limit": 5},
+    {"subreddit": "TikToks", "platform": "TikTok", "limit": 3},
+    # 바이럴 영상 서브레딧
+    {"subreddit": "Unexpected", "platform": "Instagram", "limit": 4},
+    {"subreddit": "funnyvideos", "platform": "Instagram", "limit": 3},
+    {"subreddit": "videos", "platform": "General", "limit": 3},
+    {"subreddit": "Whatcouldgowrong", "platform": "General", "limit": 3},
 ]
 GEMINI_MODEL = "gemini-2.5-flash"  # Google Gemini 2.5 Flash
 HTML_FILE = "index.html"
@@ -87,8 +87,8 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             reddit_url = f"https://www.reddit.com{permalink}" if permalink else ""
             score = post.get('score', 0)
 
-            # 최소 100 업보트 이상만 (바이럴 기준)
-            if score < 100:
+            # 최소 50 업보트 이상만 (바이럴 기준)
+            if score < 50:
                 continue
 
             # 영상 URL 추출
