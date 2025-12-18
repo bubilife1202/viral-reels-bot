@@ -628,6 +628,116 @@
         .reel-card {
             animation: fadeInUp 0.5s ease forwards;
         }
+
+        /* Video Modal */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .modal-video-container video {
+            width: 100%;
+            max-height: 80vh;
+            display: block;
+        }
+
+        .modal-video-container iframe {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border: none;
+        }
+
+        .modal-title {
+            color: #fff;
+            font-size: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: #2563eb;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -680,6 +790,21 @@
         <!-- CONTENT_START -->
         <!-- 여기에 새로운 콘텐츠가 추가됩니다 -->
 
+    </div>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeVideoModal()">✕</button>
+            <div class="modal-video-container" id="videoContainer">
+                <!-- Video will be inserted here -->
+            </div>
+            <p class="modal-title" id="modalTitle"></p>
+            <div class="modal-actions">
+                <a href="#" class="modal-btn secondary" id="modalOriginalLink" target="_blank">🔗 원본 보기</a>
+                <a href="#" class="modal-btn" id="modalDownloadLink" target="_blank">⬇️ 다운로드</a>
+            </div>
+        </div>
     </div>
 
     <!-- Footer -->
@@ -749,6 +874,75 @@
                 console.error('복사 실패:', err);
             });
         }
+
+        // 비디오 모달
+        function openVideoModal(videoUrl, title, originalUrl) {
+            const modal = document.getElementById('videoModal');
+            const container = document.getElementById('videoContainer');
+            const modalTitle = document.getElementById('modalTitle');
+            const originalLink = document.getElementById('modalOriginalLink');
+            const downloadLink = document.getElementById('modalDownloadLink');
+
+            modalTitle.textContent = title;
+            originalLink.href = originalUrl;
+            downloadLink.href = videoUrl;
+
+            // Reddit 비디오인지 확인
+            if (videoUrl.includes('v.redd.it') || videoUrl.includes('reddit')) {
+                container.innerHTML = `
+                    <video controls autoplay playsinline>
+                        <source src="${videoUrl}" type="video/mp4">
+                        브라우저가 비디오를 지원하지 않습니다.
+                    </video>
+                `;
+            } else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                // YouTube 영상
+                let videoId = '';
+                if (videoUrl.includes('youtu.be/')) {
+                    videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                } else if (videoUrl.includes('v=')) {
+                    videoId = videoUrl.split('v=')[1].split('&')[0];
+                }
+                container.innerHTML = `
+                    <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                            allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                `;
+            } else {
+                // 기타 영상
+                container.innerHTML = `
+                    <video controls autoplay playsinline>
+                        <source src="${videoUrl}" type="video/mp4">
+                        브라우저가 비디오를 지원하지 않습니다.
+                    </video>
+                `;
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const container = document.getElementById('videoContainer');
+
+            modal.classList.remove('active');
+            container.innerHTML = '';
+            document.body.style.overflow = '';
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+
+        // 모달 배경 클릭시 닫기
+        document.getElementById('videoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'videoModal') {
+                closeVideoModal();
+            }
+        });
     </script>
 
     <!-- AdSense 전면광고 (지연 로딩) -->

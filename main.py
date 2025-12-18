@@ -18,11 +18,14 @@ SUBREDDIT_CONFIG = [
     # TikTok 관련 (검증된 서브레딧)
     {"subreddit": "TikTokCringe", "platform": "TikTok", "limit": 5},
     {"subreddit": "TikToks", "platform": "TikTok", "limit": 3},
-    # 바이럴 영상 서브레딧
+    # Instagram Reels 바이럴 (릴스에 올리기 좋은 영상)
     {"subreddit": "Unexpected", "platform": "Instagram", "limit": 4},
     {"subreddit": "funnyvideos", "platform": "Instagram", "limit": 3},
-    {"subreddit": "videos", "platform": "General", "limit": 3},
-    {"subreddit": "Whatcouldgowrong", "platform": "General", "limit": 3},
+    {"subreddit": "MadeMeSmile", "platform": "Instagram", "limit": 2},
+    {"subreddit": "oddlysatisfying", "platform": "Instagram", "limit": 2},
+    # 일반 바이럴 영상
+    {"subreddit": "videos", "platform": "General", "limit": 2},
+    {"subreddit": "Whatcouldgowrong", "platform": "General", "limit": 2},
 ]
 GEMINI_MODEL = "gemini-2.5-flash"  # Google Gemini 2.5 Flash
 HTML_FILE = "index.html"
@@ -357,9 +360,12 @@ def generate_video_cards(videos):
         thumbnail = video.get('thumbnail', '')
         thumbnail_style = f'background-image: url({thumbnail}); background-size: cover; background-position: center;' if thumbnail and thumbnail.startswith('http') else ''
 
+        # 제목 이스케이프 (JavaScript용)
+        title_escaped = video.get('title', '').replace("'", "\\'").replace('"', '&quot;')
+
         cards_html += f"""
         <div class="reel-card" data-platform="{platform}">
-            <div class="card-media" onclick="window.open('{original_url}', '_blank')" style="{thumbnail_style}">
+            <div class="card-media" onclick="openVideoModal('{video_url}', '{title_escaped}', '{original_url}')" style="{thumbnail_style}">
                 <span class="platform-badge {platform_class}">
                     {'📱' if platform == 'TikTok' else '📷' if platform == 'Instagram' else '🎬'} {platform}
                 </span>
