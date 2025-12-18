@@ -6,23 +6,16 @@
     <title>Viral Reels Lab - 바이럴 영상 트렌드 분석</title>
     <meta name="description" content="TikTok, Instagram Reels 바이럴 영상 트렌드를 AI로 분석하여 한국형 콘텐츠 아이디어를 제공합니다.">
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
-    <!-- Google AdSense -->
+    <!-- Google AdSense (deferred) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8245597797545485"
      crossorigin="anonymous"></script>
-    <!-- 전면광고(Vignette) 활성화 -->
     <meta name="google-adsense-platform-account" content="ca-pub-8245597797545485">
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({
-        google_ad_client: "ca-pub-8245597797545485",
-        enable_page_level_ads: true,
-        overlays: {bottom: true}
-    });
-    </script>
 
     <style>
         :root {
@@ -756,6 +749,17 @@
                 console.error('복사 실패:', err);
             });
         }
+    </script>
+
+    <!-- AdSense 전면광고 (지연 로딩) -->
+    <script>
+    window.addEventListener('load', function() {
+        (adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-8245597797545485",
+            enable_page_level_ads: true,
+            overlays: {bottom: true}
+        });
+    });
     </script>
 </body>
 </html>
