@@ -28,18 +28,62 @@ GEMINI_MODEL = "gemini-2.5-flash"  # Google Gemini 2.5 Flash
 HTML_FILE = "index.html"
 
 
+def get_reddit_access_token():
+    """Reddit OAuth 토큰 발급 (공개 API용)"""
+    client_id = os.environ.get('REDDIT_CLIENT_ID', '')
+    client_secret = os.environ.get('REDDIT_CLIENT_SECRET', '')
+
+    if not client_id or not client_secret:
+        print("⚠️  REDDIT_CLIENT_ID 또는 REDDIT_CLIENT_SECRET이 설정되지 않았습니다.")
+        return None
+
+    auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+    headers = {'User-Agent': 'ViralReelsBot/1.0'}
+    data = {'grant_type': 'client_credentials'}
+
+    try:
+        response = requests.post(
+            'https://www.reddit.com/api/v1/access_token',
+            auth=auth, headers=headers, data=data, timeout=10
+        )
+        if response.status_code == 200:
+            token = response.json().get('access_token')
+            print("✅ Reddit OAuth 토큰 발급 성공!")
+            return token
+        else:
+            print(f"❌ Reddit OAuth 토큰 발급 실패: {response.status_code}")
+            print(f"   응답: {response.text[:200]}")
+    except Exception as e:
+        print(f"❌ Reddit OAuth 요청 오류: {e}")
+    return None
+
+
 def get_reddit_top_posts(subreddit, limit=3, platform="General"):
-    """Reddit에서 인기 게시물 가져오기 (JSON API 사용)"""
-    # TOP 정렬로 변경 (week 기준 - 더 많은 바이럴 영상)
-    url = f"https://www.reddit.com/r/{subreddit}/top.json?t=week&limit={limit * 5}"
+    """Reddit에서 인기 게시물 가져오기 (OAuth API 사용)"""
+
+    # OAuth 토큰 시도
+    token = get_reddit_access_token()
+
+    if token:
+        # OAuth API 사용
+        url = f"https://oauth.reddit.com/r/{subreddit}/top?t=week&limit={limit * 5}"
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'User-Agent': 'ViralReelsBot/1.0'
+        }
+        print(f"   🔐 OAuth API 사용: oauth.reddit.com")
+    else:
+        # 폴백: old.reddit.com 시도
+        url = f"https://old.reddit.com/r/{subreddit}/top.json?t=week&limit={limit * 5}"
+        headers = {
+            'User-Agent': 'ViralReelsBot/1.0 (by /u/viral_reels_bot)'
+        }
+        print(f"   ⚠️  폴백 모드: old.reddit.com (OAuth 없이)")
 
     try:
         # 요청 간 딜레이 추가 (Reddit API 정책 준수)
         time.sleep(3)
 
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
         response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
 
