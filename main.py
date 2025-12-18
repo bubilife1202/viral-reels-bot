@@ -30,8 +30,8 @@ HTML_FILE = "index.html"
 
 def get_reddit_top_posts(subreddit, limit=3, platform="General"):
     """Reddit에서 인기 게시물 가져오기 (JSON API 사용)"""
-    # JSON API 사용 (더 안정적이고 최신 데이터)
-    url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit={limit * 5}"
+    # TOP 정렬로 변경 (week 기준 - 더 많은 바이럴 영상)
+    url = f"https://www.reddit.com/r/{subreddit}/top.json?t=week&limit={limit * 5}"
 
     try:
         # 요청 간 딜레이 추가 (Reddit API 정책 준수)
@@ -51,7 +51,6 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             return []
 
         posts = []
-        current_time = time.time()
 
         for child in children:
             # 광고/프로모션 게시물 스킵
@@ -65,30 +64,14 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
                 continue
             if post.get('promoted', False):
                 continue
-            if post.get('is_reddit_media_domain') == False and post.get('is_self') == True:
-                continue
 
             # 삭제된 게시물 스킵
             title = post.get('title', '')
             author = post.get('author', '')
-            selftext = post.get('selftext', '')
 
             if author in ['[deleted]', '[removed]']:
                 continue
             if title in ['[deleted]', '[removed]', '[deleted by user]']:
-                continue
-            if selftext in ['[deleted]', '[removed]']:
-                continue
-
-            # 광고성 키워드 필터링
-            ad_keywords = ['광고', 'AD', 'Sponsored', 'promoted', '투자', '가입', '할인', '무료체험']
-            if any(kw.lower() in title.lower() for kw in ad_keywords):
-                continue
-
-            # 48시간 이내 게시물만
-            created_utc = post.get('created_utc', 0)
-            age_hours = (current_time - created_utc) / 3600
-            if age_hours > 48:
                 continue
 
             # 영상 게시물만 필터링
@@ -103,6 +86,10 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             permalink = post.get('permalink', '')
             reddit_url = f"https://www.reddit.com{permalink}" if permalink else ""
             score = post.get('score', 0)
+
+            # 최소 100 업보트 이상만 (바이럴 기준)
+            if score < 100:
+                continue
 
             # 영상 URL 추출
             video_url = None
@@ -127,20 +114,29 @@ def get_reddit_top_posts(subreddit, limit=3, platform="General"):
             if not video_url:
                 continue
 
+            # 썸네일 URL
+            thumbnail = post.get('thumbnail', '')
+            preview = post.get('preview', {})
+            if preview and 'images' in preview and len(preview['images']) > 0:
+                thumbnail = preview['images'][0].get('source', {}).get('url', thumbnail)
+                # HTML 엔티티 디코딩
+                thumbnail = thumbnail.replace('&amp;', '&')
+
             posts.append({
                 "title": title,
                 "url": video_url,
                 "reddit_url": reddit_url,
                 "score": score,
                 "subreddit": subreddit,
-                "platform": platform
+                "platform": platform,
+                "thumbnail": thumbnail
             })
 
             # 필요한 개수만큼 수집하면 종료
             if len(posts) >= limit:
                 break
 
-        print(f"   📹 영상 게시물 {len(posts)}개 발견")
+        print(f"   📹 영상 게시물 {len(posts)}개 발견 (100+ 업보트)")
         return posts
 
     except Exception as e:
@@ -161,7 +157,7 @@ def analyze_with_gemini(posts):
 
     # 프롬프트 구성
     posts_summary = "\n\n".join([
-        f"[영상 {i+1}]\n제목: {p['title']}\n플랫폼: {p.get('platform', 'General')}\n출처: r/{p['subreddit']}\nURL: {p['url']}"
+        f"[영상 {i+1}]\n제목: {p['title']}\n플랫폼: {p.get('platform', 'General')}\n출처: r/{p['subreddit']}\nURL: {p['url']}\n썸네일: {p.get('thumbnail', '')}\nReddit URL: {p.get('reddit_url', '')}"
         for i, p in enumerate(posts)
     ])
 
@@ -182,8 +178,9 @@ def analyze_with_gemini(posts):
       "hook_point": "첫 3초에 OO한 심리를 자극해서 터짐 (한 줄)",
       "korean_patch": "한국에서는 이런 밈/음원/상황으로 바꾸면 좋음",
       "script": "장면1: (0-3초) 후크 문구\\n장면2: (3-10초) 핵심 전개\\n장면3: (10-15초) 마무리 펀치라인\\n\\n자막: '핵심 자막 1-2줄'\\n해시태그: #태그1 #태그2 #태그3",
-      "original_url": "원본 Reddit URL",
-      "video_url": "영상 URL"
+      "original_url": "원본 Reddit URL (그대로 복사)",
+      "video_url": "영상 URL (그대로 복사)",
+      "thumbnail": "썸네일 URL (그대로 복사)"
     }}
   ]
 }}
@@ -193,6 +190,7 @@ def analyze_with_gemini(posts):
 - difficulty: "Easy" (초보 가능), "Medium" (연기 필요), "Hard" (편집 기술 필요)
 - category: "Faceless" (얼굴 노출 X), "Skit" (상황극), "Trend" (챌린지), "Info" (정보성)
 - platform: "TikTok", "Instagram", "General" 중 하나 (원본 플랫폼 그대로 사용)
+- original_url, video_url, thumbnail은 입력에서 받은 URL을 **그대로 복사**해서 출력
 - 반드시 유효한 JSON만 출력 (추가 설명 금지)
 - 각 필드는 실행 가능한 구체적 정보로 작성
 """
@@ -311,9 +309,13 @@ def generate_video_cards(videos):
         video_url = video.get('video_url', '#')
         original_url = video.get('original_url', video_url)
 
+        # 썸네일 URL
+        thumbnail = video.get('thumbnail', '')
+        thumbnail_style = f'background-image: url({thumbnail}); background-size: cover; background-position: center;' if thumbnail and thumbnail.startswith('http') else ''
+
         cards_html += f"""
         <div class="reel-card" data-platform="{platform}">
-            <div class="card-media" onclick="window.open('{original_url}', '_blank')">
+            <div class="card-media" onclick="window.open('{original_url}', '_blank')" style="{thumbnail_style}">
                 <span class="platform-badge {platform_class}">
                     {'📱' if platform == 'TikTok' else '📷' if platform == 'Instagram' else '🎬'} {platform}
                 </span>
