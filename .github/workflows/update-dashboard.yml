@@ -2,12 +2,17 @@ name: Update Viral Reels Dashboard
 
 on:
   push:
-    branches: [main, master, claude/*]
+    branches:
+      - main
+      - master
+      - 'claude/**'
   schedule:
     # 매일 한국시간 오전 8시 (UTC 전날 23시)
-    # 예: UTC 11/19 23:00 = KST 11/20 08:00
     - cron: '0 23 * * *'
-  workflow_dispatch:  # 수동 실행 가능
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update:
@@ -16,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
